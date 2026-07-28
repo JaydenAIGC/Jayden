@@ -70,17 +70,17 @@ class Backend:
         try:
             prompt="""你作为宏大概念主体设计师。输出1个独特的巨型核心主体，25-45字。
 格式：地貌环境 + 独特的巨型建筑/结构体。
-要求多样创意，跨越不同文明风格和地貌：
-- 风格：科幻、远古、奇幻、废土、东方、西方、蒸汽朋克等随机切换
-- 地貌：冰原、沙漠、深海、云海、火山、森林、城市废墟、地下空洞等随机切换
-- 建筑：堡垒、塔楼、穹顶、桥梁、雕像、环形结构、悬浮体、巨门、方尖碑、竞技场等随机组合
-- 禁止连续两次生成类似组合
-
-只输出一行，不要编号不要引号。"""
+要求：
+- 偏向科幻、废土、极简主义、史诗建筑风格
+- 避免奇幻、魔法、符文、生物骨骼、精灵等元素
+- 优先：混凝土、金属、石材、玻璃等现实材质
+- 结构：塔楼、穹顶、环形、框架、桥梁、平台、巨门、方尖碑等
+- 地貌：冰原、沙漠、云海、荒原、海岸、城市废墟、地下空间等
+- 只输出一行，不要编号不要引号。示例：云海之上悬浮着倒置的白色金属巨塔"""
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
                "messages":[{"role":"user","content":prompt}],
-               "max_tokens":400,"temperature":0.8}
+               "max_tokens":400,"temperature":0.6}
             r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=30)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
@@ -663,7 +663,7 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 /* 手机端适配 */
 @media(max-width:768px){
 body{font-size:13px;overflow:auto}
-.header{padding:8px 10px;gap:6px;flex-wrap:wrap;justify-content:flex-start}.header h1{font-size:15px!important;text-align:left;margin-bottom:2px}
+.header{padding:8px 10px;gap:6px;flex-wrap:wrap;justify-content:flex-start}.header h1{font-size:17px!important;text-align:left;margin-bottom:2px}
 .header .tab{font-size:11px;padding:4px 8px}
 .header .btng{font-size:9px!important;padding:2px 5px!important}
 .grid{grid-template-columns:1fr!important;gap:8px}
@@ -700,7 +700,7 @@ body{font-size:13px;overflow:auto}
 <body>
 <div class="header">
  <div style="display:flex;flex-direction:column;line-height:1.2;flex-shrink:0">
-  <h1 style="margin:0;font-size:150px;font-weight:700;line-height:1;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">街灯AI</h1>
+  <h1 style="margin:0;font-size:22px;font-weight:700;line-height:1;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">街灯AI</h1>
   <span style="font-size:9px;color:var(--hint);font-weight:400;letter-spacing:1px">Created by Jayden</span>
  </div>
  <div style="flex:1"></div>
