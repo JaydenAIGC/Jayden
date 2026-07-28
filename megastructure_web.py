@@ -635,6 +635,7 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 .bbar .cnt{width:50px;text-align:center;min-width:50px}
 .btng{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:5px;font-size:11px;font-weight:600;border:none;cursor:pointer;transition:all .12s;line-height:1}
 .btng-p{background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff}
+.btng-i{background:linear-gradient(135deg,#00b894,#55efc4);color:#fff}
 .btng-p:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(108,92,231,.2)}
 .btng-s{background:var(--surf);color:var(--body);border:1px solid var(--border)}
 .btng-s:hover{background:var(--input);color:var(--text);border-color:var(--accent)}
@@ -724,7 +725,7 @@ body{font-size:13px;overflow:auto}
    <option value="1024x1792" selected>9:16 竖</option>
    <option value="1344x768">宽屏</option>
   </select>
-  <button class="btng btng-p" onclick="genIdeas()" id="ideaBtn">生成灵感</button>
+  <button class="btng btng-i" onclick="genIdeas()" id="ideaBtn">生成灵感</button>
   <button class="btng btng-p" onclick="batchGen()" id="genBtn">批量生成</button>
   <button class="btng btng-d" onclick="toggleAdv()" id="advBtn">⚙高级</button>
  </div>
@@ -787,10 +788,10 @@ function togglePrompt(i){
  const el=document.getElementById("desc"+i);
  if(el.textContent==CARDS[i].prompt){
   el.textContent=CARDS[i].desc;
-  document.getElementById("toggle"+i).textContent="📄完整";
+  document.getElementById("toggle"+i).textContent="▼";
  }else{
   el.textContent=CARDS[i].prompt;
-  document.getElementById("toggle"+i).textContent="📄精简";
+  document.getElementById("toggle"+i).textContent="▲";
  }
 }
 async function genIdeas(){
@@ -825,11 +826,11 @@ async function genIdeas(){
   CARDS.push({desc:d,img:null,prompt:fp,batchId:r.batch_id||"",descIdx:i});
   const c=document.createElement("div");c.className="card";
   c.innerHTML=`<div class="idx">#${i+1}
-   <span style="float:right;font-size:9px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">📄完整</span></div>
+   <span style="float:right;font-size:10px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">▼</span></div>
    <div class="desc" id="desc${i}" ondblclick="editDesc(${i})">${d}</div>
    <div class="acts">
-    <button class="btng btng-p" style="font-size:11px;padding:4px 10px" onclick="genImg(${i})">生图</button>
-    <button class="btng btng-s" style="font-size:11px;padding:4px 10px" onclick="redoDesc(${i})">重写</button>
+    <button class="btng btng-p" style="font-size:12px;padding:5px 12px" onclick="genImg(${i})">开始生图</button>
+    <button class="btng btng-s" style="font-size:12px;padding:5px 12px" onclick="redoDesc(${i})">重新描述</button>
     <button class="btng btng-d hidden" style="font-size:9px;padding:2px 6px" id="save${i}" onclick="saveImg(${i})">保存</button>
    </div>
    <div class="prev" id="prev${i}"><span class="ph">等待生图...</span></div>
@@ -840,10 +841,10 @@ async function genIdeas(){
   grid.appendChild(c);
  });
  const bar=document.getElementById("batchBar");bar.classList.remove("hidden");
- bar.innerHTML=`<button class="btng btng-s" style="font-size:11px;padding:4px 10px" onclick="genAll()">全部生图</button>
-  <button class="btng btng-s" style="font-size:11px;padding:4px 10px" onclick="saveAll()">批量保存</button>
-  <button class="btng btng-d" style="font-size:11px;padding:4px 10px" onclick="optimizeAll()">✨AI优化</button>
-  <button class="btng btng-d" style="font-size:11px;padding:4px 10px" onclick="redoAll()">全部重写</button>
+ bar.innerHTML=`<button class="btng btng-p" style="font-size:13px;padding:6px 16px" onclick="genAll()">全部生图</button>
+  <button class="btng btng-i" style="font-size:13px;padding:6px 16px" onclick="saveAll()">批量保存</button>
+  <button class="btng btng-d" style="font-size:13px;padding:6px 16px;background:linear-gradient(135deg,#e17055,#fdcb6e);color:#fff" onclick="optimizeAll()">AI优化</button>
+  <button class="btng btng-s" style="font-size:13px;padding:6px 16px;background:var(--accent2);color:#fff;border:none" onclick="redoAll()">全部重写</button>
   <span style="font-size:9px;color:var(--hint);margin-left:auto">双击描述词可编辑</span>`;
  st(`已生成 ${r.descriptions.length} 条`,"var(--accent2)");
  }catch(e){st("异常: "+e.message,"var(--warn)");document.getElementById("genBtn").disabled=false;document.getElementById("genBtn").innerHTML="批量生成"}
@@ -859,10 +860,10 @@ async function redoDesc(i){
  const btns=document.querySelectorAll(".card")[i]?.querySelectorAll("button");
  if(btns&&btns[1]){btns[1].disabled=true;btns[1].innerHTML='<span class="loading"></span>'}
  const r=await api("/api/gen_one");
- if(btns&&btns[1]){btns[1].disabled=false;btns[1].innerHTML="重写"}
+ if(btns&&btns[1]){btns[1].disabled=false;btns[1].innerHTML="重新描述"}
  if(!r.ok)return;
  CARDS[i].desc=r.desc;CARDS[i].prompt=r.prompt||r.desc;
- document.getElementById("desc"+i).textContent=document.getElementById("toggle"+i)?.textContent=="📄精简"?r.prompt||r.desc:r.desc;
+ document.getElementById("desc"+i).textContent=document.getElementById("toggle"+i)?.textContent=="▲"?r.prompt||r.desc:r.desc;
  document.getElementById("prev"+i).innerHTML='<span class="ph">等待生图...</span>';
  document.getElementById("save"+i).classList.add("hidden");st("已更新","var(--accent2)");
 }
@@ -886,7 +887,7 @@ async function optimizeAll(){
  st("智能优化Prompt中...","var(--accent)");
  const descs=CARDS.map(c=>c.prompt||c.desc);
  const r=await api("/api/optimize",{descriptions:descs});
- if(btn){btn.disabled=false;btn.innerHTML="✨AI优化"}
+ if(btn){btn.disabled=false;btn.innerHTML="AI优化"}
  if(!r.ok||!r.optimized){st("优化失败: "+(r.error||"未知"),"var(--warn)");return}
  for(let i=0;i<r.optimized.length&&i<CARDS.length;i++){
   const full=r.optimized[i];
@@ -909,14 +910,14 @@ async function genImg(i){
   const raw=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({desc:CARDS[i].desc,prompt:CARDS[i].prompt||CARDS[i].desc,comp:COMP,light:LIGHT,size:sz,human:HUMAN,batch_id:CARDS[i].batchId||"",desc_idx:CARDS[i].descIdx||i})});
   const txt=await raw.text();console.log("genImg raw:",txt);
   let r;
-  try{r=JSON.parse(txt)}catch(e){st("生图异常: 返回非JSON: "+txt.slice(0,80),"var(--warn)");if(btn){btn.disabled=false;btn.innerHTML="生图"}return}
-  if(btn){btn.disabled=false;btn.innerHTML="生图"}
+  try{r=JSON.parse(txt)}catch(e){st("生图异常: 返回非JSON: "+txt.slice(0,80),"var(--warn)");if(btn){btn.disabled=false;btn.innerHTML="开始生图"}return}
+  if(btn){btn.disabled=false;btn.innerHTML="开始生图"}
   if(!r.ok||!r.b64){st("生图失败: "+(r.error||"无法解析错误"),"var(--warn)");return}
   document.getElementById("prev"+i).innerHTML=`<img src="data:image/png;base64,${r.b64}" onclick="zoomImg(${i})" />`;
   CARDS[i].img=r.b64;document.getElementById("save"+i).classList.remove("hidden");
   document.querySelectorAll(".card")[i]?.classList.add("has-img");
   st("完成","var(--accent2)");
- }catch(e){console.error("genImg err:",e);if(btn){btn.disabled=false;btn.innerHTML="生图"}st("生图异常: "+e.message,"var(--warn)")}
+ }catch(e){console.error("genImg err:",e);if(btn){btn.disabled=false;btn.innerHTML="开始生图"}st("生图异常: "+e.message,"var(--warn)")}
 }
 async function genAll(){for(let i=0;i<CARDS.length;i++){if(!CARDS[i].img)await genImg(i)}st("全部完成","var(--accent2)")}
 function saveImg(i){
