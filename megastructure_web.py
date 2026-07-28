@@ -411,7 +411,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def _check_auth(self):
         if not AUTH_TOKEN: return True
         ck=self.headers.get("Cookie","")
-        return f"token={AUTH_TOKEN}" in ck
+        import urllib.parse
+        for part in ck.split(";"):
+            part=part.strip()
+            if part.startswith("token="):
+                return urllib.parse.unquote(part[6:])==AUTH_TOKEN
+        return False
     def _login_page(self):
         self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
         self.wfile.write(f"""<!DOCTYPE html><html><head><meta charset="utf-8"><title>街灯AI--场景生成器</title>
@@ -723,9 +728,8 @@ body{font-size:13px;overflow:auto}
 <script>
 let CARDS=[],CONFIG={},COMP=false,LIGHT=false,HUMAN=true;
 async function api(path,data){
- console.log("api call:",path,data);
- const r=await fetch(path,{method:data?"POST":"GET",headers:{"Content-Type":"application/json"},body:data?JSON.stringify(data):null});
- const j=await r.json();console.log("api resp:",path,j);return j}
+ const r=await fetch(path,{method:data?"POST":"GET",headers:{"Content-Type":"application/json"},credentials:"include",body:data?JSON.stringify(data):null});
+ const j=await r.json();return j}
 async function init(){
  const r=await api("/api/init");CONFIG=r.config||{};
  // 回填后缀
@@ -878,7 +882,7 @@ async function genImg(i){
  pv.innerHTML='<span class="ph" style="color:var(--accent)"><span class="loading" style="width:14px;height:14px;border-width:2px"></span> 生图中...</span>';
  st(`生图中 ${i+1}/${CARDS.length}...`,"var(--accent)");
  try{
-  const raw=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({desc:CARDS[i].desc,prompt:CARDS[i].prompt||CARDS[i].desc,comp:COMP,light:LIGHT,size:sz,human:HUMAN,batch_id:CARDS[i].batchId||"",desc_idx:CARDS[i].descIdx||i})});
+  const raw=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({desc:CARDS[i].desc,prompt:CARDS[i].prompt||CARDS[i].desc,comp:COMP,light:LIGHT,size:sz,human:HUMAN,batch_id:CARDS[i].batchId||"",desc_idx:CARDS[i].descIdx||i})});
   const txt=await raw.text();console.log("genImg raw:",txt);
   let r;
   try{r=JSON.parse(txt)}catch(e){st("生图异常: 返回非JSON: "+txt.slice(0,80),"var(--warn)");if(btn){btn.disabled=false;btn.innerHTML="生图"}return}
