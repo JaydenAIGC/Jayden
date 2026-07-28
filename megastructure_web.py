@@ -372,36 +372,42 @@ class Backend:
         if light:
             lights=["晨雾浓度增加，光线更柔和","暮色更深，冷蓝色调为主","霞光增强，金色轮廓光更明显","阴沉天光，无直射光，漫反射为主","薄暮时分，天边残留微弱暖光"]
             bp+=f"，{__import__('random').choice(lights)}"
-        # 顺序：镜头语言 → 画风标签 → 核心主体 → 环境人物 → 光影色彩 → 画质
+        # 场景分类：巨构式「虚无干净」vs 自然场景「有序干净」
+        d=desc.lower()
+        is_natural=any(w in d for w in ["森林","林","树","丛林","海岸","沙滩","海滩","古","中式","东方","庙","塔","宫","亭","阁","花","草","山"])
+        # 通用正向固定骨架
+        skeleton="24-28mm广角，三分构图，预留大面积留白空间，无近距离杂乱前景，影视概念渲染，低纹理密度，材质完整，柔和物理光照，单一光源，少量环境元素，剔除多余细碎物体，低饱和统一色调，8K，画面通透干净"
         # ① 镜头语言
-        lens="低角度仰拍，24mm广角镜头，三分法构图，地平线位于画面下方三分之一，深景深，全域清晰，画面上方大面积天空留白，无近距离前景遮挡"
+        lens="低角度仰拍，24mm广角镜头，深景深，全域清晰，画面上方大面积留白，无近距离前景遮挡"
         # ② 画风标签
         has_human_desc=any(w in desc for w in ["人影","剪影","人物","行人","身影","背影","骑手"])
-        if has_human_desc or human:
-            style_tag="影视级环境概念原画，Unreal Engine 5渲染，Lumen全局光照，宏大科幻场景，干净PBR材质，精准物理光照，低纹理密度，柔和物理渲染"
+        if is_natural:
+            style_tag="影视环境概念原画，Unreal Engine 5渲染，干净PBR材质，低纹理密度，自然光线，材质完整无破损" if (has_human_desc or human) else "梦幻自然景观，干净超写实渲染，低纹理密度，空灵通透，无手绘笔触"
         else:
-            style_tag="阈限空间，梦核建筑，极简科幻概念艺术，干净Octane渲染，柔和物理材质，低纹理密度，空旷乌托邦景观，无多余纹理噪点"
+            style_tag="影视级环境概念原画，Unreal Engine 5渲染，Lumen全局光照，宏大科幻场景，干净PBR材质，精准物理光照，低纹理密度" if (has_human_desc or human) else "阈限空间，梦核建筑，极简科幻概念艺术，干净Octane渲染，低纹理密度，空旷乌托邦景观，无多余纹理噪点"
         # ③ 核心主体 从 desc 来
-        # ④ 场景自适应环境（根据描述词自动匹配留白载体）
-        d=desc.lower()
+        # ④ 场景自适应环境
         if any(w in d for w in ["海","海洋","海岸","沙滩","海滩","礁石","浪"]):
-            env="，主体坐落于海岸边，宽阔平静海面作为大面积留白，远处海平线，零星礁石点缀，无多余船只无海鸟无沙滩杂物"
+            env="，主体坐落于海岸边，宽阔平静海面作为大面积留白，零星礁石点缀"
         elif any(w in d for w in ["森林","林","树","丛林","密林","林地"]):
-            env="，主体隐于浓雾森林中，开阔林间空地作为留白，大面积雾幕遮蔽杂乱植被，无细碎枝叶无灌木丛无动物"
+            env="，主体隐于开阔林间，大面积浓雾作为留白遮蔽杂乱，稀疏树木规整排列，无细碎枝叶无灌木丛"
         elif any(w in d for w in ["荒漠","沙漠","沙","戈壁","干旱"]):
-            env="，主体立于无垠荒漠之上，平整沙地作为大面积留白，远处薄雾地平线，极简沙丘线条，无碎石无植被无生物"
+            env="，主体立于无垠荒漠之上，平整沙地作为大面积留白，远处薄雾地平线，极简沙丘线条"
         elif any(w in d for w in ["室内","房间","大厅","走廊","殿","堂","厅","馆"]):
-            env="，主体置于空旷宏大室内空间，大面积纯色墙面与平整地面作为留白，极简空间结构，无家具无装饰无杂物"
+            env="，主体置于空旷宏大室内，大面积纯色墙面与平整地面作为留白，极简空间结构"
         elif any(w in d for w in ["水下","深海","海底","海下","水中","沉没"]):
-            env="，主体悬浮于深海水域，开阔水域作为大面积留白，远处微弱幽光，无鱼群无珊瑚无海底杂物"
+            env="，主体悬浮于深海水域，开阔水域作为大面积留白，远处微弱幽光"
         elif any(w in d for w in ["城市","都市","赛博","霓虹","街道","高楼"]):
-            env="，主体耸立于城市之中，平整路面与纯净天空作为留白，干净简洁现代建筑轮廓，无广告牌无电线无车辆无行人"
+            env="，主体耸立于城市之中，平整路面与纯净天空作为留白，干净简洁现代建筑轮廓"
         elif any(w in d for w in ["古","中式","东方","庙","塔","宫","殿","亭","阁"]):
-            env="，主体置于古风意境中，大面积留白天际与薄雾，极简山水轮廓，无多余植被无小桥无人物"
+            env="，主体置于古风意境中，大面积薄雾留白，极简山水轮廓，元素稀疏排布"
         else:
             env="，巨型主体悬浮于分层纯净云海之上，纯净渐变天空，无多余杂物，空旷大地"
-        # 元素配额制：只保留1个核心主体+1类环境元素，最多1种点缀
-        env+="，仅一个核心视觉主体，仅一类配套环境元素，无多余物体堆砌"
+        # 元素配额制
+        if is_natural:
+            env+="，元素稀疏排布规整，无细碎杂乱小东西"
+        else:
+            env+="，仅一个核心视觉主体，仅一类配套环境元素，大量空白，无多余物体堆砌"
         # ⑤ 人物策略
         neg_human=""
         if has_human_desc:
@@ -418,10 +424,15 @@ class Backend:
         light_color="单侧柔和漫射光，单一光源，无杂乱多重光斑，低饱和统一色调，色彩克制，整体色调协调统一，均匀通透光线，无强烈硬阴影，无死黑死角"
         # ⑦ 画质+光学
         quality="8K超写实渲染，细腻干净纹理，画面通透，电影级渲染，柔和光学效果，无杂乱眩光，无零散星芒，无色散"
-        # 组装完整prompt
+        # 组装完整prompt：通用骨架+场景变量
         p=f"{desc}, {art}, {bp}" if art else desc
         p+=f"，{lens}，{style_tag}，{env}，{light_color}，{quality}"
-        p+=f"，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground, no hand painted, no thick paint, no cel shading, no sketch lines, no rough metal, no muddy ground, no moss, no cracks, no rust, no wear and tear{neg_human}"
+        # 通用基础负面词
+        neg_base="，杂乱碎片，大量零散物体，密集植被，过多人群，四处飘散的飞鸟，杂乱眩光，彩色杂光斑，严重破损锈蚀，噪点，拥挤构图"
+        if is_natural:
+            p+=f"{neg_base}{neg_human}"
+        else:
+            p+=f"{neg_base}{neg_human}，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground, no hand painted, no thick paint, no cel shading, no sketch lines, no rough metal, no muddy ground, no moss, no cracks, no rust, no wear and tear"
         # 标注画幅尺寸
         size_map={"1024x1024":"方形构图1:1","1792x1024":"横屏宽幅16:9","1024x1792":"竖屏9:16","1344x768":"宽屏"}
         sn=size_map.get(size,"")
