@@ -376,9 +376,9 @@ class Backend:
         # ② 画风标签
         has_human_desc=any(w in desc for w in ["人影","剪影","人物","行人","身影","背影","骑手"])
         if is_natural:
-            style_tag="影视环境概念原画，Unreal Engine 5渲染，干净PBR材质，低纹理密度，自然光线，材质完整无破损" if (has_human_desc or human) else "梦幻自然景观，干净超写实渲染，低纹理密度，空灵通透，无手绘笔触"
+            style_tag="影视环境概念原画，Octane渲染，宏大景观艺术，低纹理密度，干净PBR材质，柔和全局光照，自然光线，材质完整无破损" if (has_human_desc or human) else "梦幻自然景观，干净超写实渲染，低纹理密度，稀薄氛围，空灵通透，无手绘笔触"
         else:
-            style_tag="影视级环境概念原画，Unreal Engine 5渲染，Lumen全局光照，宏大科幻场景，干净PBR材质，精准物理光照，低纹理密度" if (has_human_desc or human) else "阈限空间，梦核建筑，极简科幻概念艺术，干净Octane渲染，低纹理密度，空旷乌托邦景观，无多余纹理噪点"
+            style_tag="Unreal Engine 5，Lumen全局光照，科幻建筑概念设计，宏大孤寂景观，平滑材质表面，干净PBR材质，无过度斑驳纹理，低纹理密度" if (has_human_desc or human) else "梦核美学，阈限空间，极简科幻概念渲染，稀薄氛围，克制纹理，空旷乌托邦场景，干净Octane渲染"
         # ③ 核心主体 从 desc 来
         # ④ 场景自适应环境
         if any(w in d for w in ["海","海洋","海岸","沙滩","海滩","礁石","浪"]):
@@ -423,7 +423,7 @@ class Backend:
         p=f"{desc}, {art}, {bp}" if art else desc
         p+=f"，{lens}，{style_tag}，{env}，{light_color}，{quality}"
         # 通用基础负面词
-        neg_base="，杂乱碎片，大量零散物体，密集植被，过多人群，四处飘散的飞鸟，杂乱眩光，彩色杂光斑，严重破损锈蚀，噪点，拥挤构图"
+        neg_base="，杂乱碎片，大量零散物体，密集植被，过多人群，四处飘散的飞鸟，杂乱眩光，彩色杂光斑，严重破损锈蚀，噪点，拥挤构图，手绘厚涂，二次元动漫，胶片粗颗粒，风化破损废墟，大量雕刻细节，密集管线，斑驳纹理"
         if is_natural:
             p+=f"{neg_base}{neg_human}"
         else:
