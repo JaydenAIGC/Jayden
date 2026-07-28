@@ -134,8 +134,8 @@ class Backend:
             r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=28)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
-            lines=[l.strip().lstrip("0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>30]
-            lines=[l for l in lines if len(l)>30][:count]
+            lines=[l.strip().lstrip("0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>15]
+            lines=[l for l in lines if len(l)>15][:count]
             # 用build_prompt生成full prompt作为后备，同时把初稿作为desc
             prompts=[self.build_prompt(lines[i] if i<len(lines) else subject,False,False,self.config.get("keep_human",True),"1024x1792") for i in range(count)]
             batch_id=self._new_batch(subject or f"场景",lines[:count])
