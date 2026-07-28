@@ -449,8 +449,6 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
         elif self.path=="/api/list_batches": self._json({"ok":True,"batches":backend._load_batches()})
         else: self.send_error(404)
     def do_POST(self):
-        if AUTH_TOKEN and not self._check_auth():
-            self._json({"ok":False,"error":"未授权"}); return
         if self.path=="/":
             length=int(self.headers.get("Content-Length",0))
             body=self.rfile.read(length).decode() if length else ""
@@ -463,6 +461,8 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
                 self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
                 self.wfile.write(f"""<!DOCTYPE html><html><body style="background:#0f0f13;color:#e8e8ed;display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui"><div style="text-align:center"><p style="color:#e17055;margin-bottom:16px">❌ 密码错误</p><a href="/" style="color:#6c5ce7">重新输入</a></div></body></html>""".encode())
             return
+        if AUTH_TOKEN and not self._check_auth():
+            self._json({"ok":False,"error":"未授权"}); return
         length=int(self.headers.get("Content-Length",0))
         body=self.rfile.read(length).decode() if length else ""
         data=json.loads(body) if body else {}
