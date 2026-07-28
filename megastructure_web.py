@@ -79,18 +79,15 @@ class Backend:
         return {"config":{k:self.config[k] for k in ["llm_api_key","llm_base_url","text_model","image_api_key","image_base_url","image_model","custom_suffix","keep_human"]}}
     def gen_subject_ideas(self):
         try:
-            prompt="""你是一位史诗场景创意大师。输出5个不同的巨构场景主题，每行一个，20-40字。
+            prompt="""你作为宏大概念主体设计师。输出1个独特的巨型核心主体，25-45字。
 格式：地貌环境 + 独特的巨型建筑/结构体。
 要求多样创意，跨越不同文明风格和地貌：
-- 可以是科幻、远古、奇幻、废土、东方、西方等不同风格
-- 地貌：冰原、沙漠、深海、云海、火山、森林、城市废墟、地下空洞等
-- 建筑：堡垒、塔楼、穹顶、桥梁、雕像、环形结构、悬浮体、巨门、方尖碑、竞技场等
-- 禁止重复类似的结构和地貌
+- 风格：科幻、远古、奇幻、废土、东方、西方、蒸汽朋克等随机切换
+- 地貌：冰原、沙漠、深海、云海、火山、森林、城市废墟、地下空洞等随机切换
+- 建筑：堡垒、塔楼、穹顶、桥梁、雕像、环形结构、悬浮体、巨门、方尖碑、竞技场等随机组合
+- 禁止连续两次生成类似组合
 
-示例：
-云海之上悬浮着一座倒置的金属巨塔
-沙漠深处半掩埋着巨型石质人面雕像
-冰原裂隙中横跨着一座远古拱桥"""
+只输出一行，不要编号不要引号。"""
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
                "messages":[{"role":"user","content":prompt}],
@@ -104,37 +101,29 @@ class Backend:
         except Exception as e: return {"ok":False,"error":f"异常: {str(e)[:80]}"}
     def gen_desc(self,subject,count,rotate=False):
         if subject:
-            ins=f"""围绕主题「{subject}」生成{count}条场景描述JSON，每行一个：
-{{"subject":"场景描述文本"}}
+            ins=f"""【第二步：结构化初稿】基于核心主体「{subject}」生成{count}条完整初稿，每行一条。
 
-面向绘图模型优化，核心规则（必须遵守）：
-- ⚠️ **同一建筑主体**：{count}条必须是**同一建筑主体**，不能替换为其他建筑
-- ⚠️ **共性原则**：地貌环境、材质（石料/锈蚀/风化等）、色调、光线时段、建筑形态必须**完全一致**
-- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼→俯瞰
-- ⚠️ 禁止环境变化——第一条是冰原雪地，后面就不能变成沙漠或戈壁
-- 核心情绪：孤寂、震撼、空旷
-- 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声、无垠
-- subject要求**80-120字**，强化：空间层次、材质质感、光线方向与色温
-- ⚠️ **句式差异化**：每条的后半段不能相同，不能都以"立于……之中""静静矗立于……"等收尾
-- **全程用中文描述，不要夹杂英文**
-- 禁止人物、特写、小型物件（人物由「✨AI优化」步骤统一添加）
-- 禁止短句、禁止笼统概括"""
+语序强制固定（不可改变顺序）：镜头语言 → 美术画风 → 核心主体与配套环境 → 人物设定 → 光影色彩 → 材质画质
+
+规则：
+- 完整保留以下主体，搭配适配基础环境：{subject}
+- 自主选择机位，优先24-28mm广角，全景采用深景深
+- 平衡规整构图，画面充足留白
+- 添加远景适配单人，体型微小，主体为视觉重心
+- 仅搭建完整基础要素，不用深度润色
+- 全程用中文"""
         else:
-            ins=f"""生成{count}条场景描述JSON，每行一个：
-{{"subject":"场景描述文本"}}
+            ins=f"""【第二步：结构化初稿】创作{count}条完整初稿描述，每行一条。
 
-面向绘图模型优化，核心规则（必须遵守）：
-- ⚠️ **同一建筑主体**：{count}条必须是**同一建筑主体**，不能替换
-- ⚠️ **共性原则**：地貌、材质、色调、光线时段、建筑形态必须**完全一致**
-- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼
-- ⚠️ 禁止环境变化
-- 核心情绪：孤寂、震撼、空旷
-- 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声
-- subject要求**80-120字**，强化：空间层次、材质质感、光线方向与色温
-- ⚠️ **句式差异化**：每条的后半段不能相同
-- **全程用中文描述，不要夹杂英文**
-- 禁止人物、特写、小型物件（人物由「✨AI优化」步骤统一添加）
-- 禁止短句、禁止笼统概括"""
+语序强制固定：镜头语言 → 美术画风 → 核心主体与配套环境 → 人物设定 → 光影色彩 → 材质画质
+
+规则：
+- 自主创作宏大核心主体，单一核心不堆砌
+- 自主选择机位，优先24-28mm广角，全景深景深
+- 平衡规整构图，充足留白
+- 添加远景单人，体型微小
+- 仅搭建基础要素，不用深度润色
+- 全程用中文"""
         try:
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
@@ -142,14 +131,10 @@ class Backend:
             r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=60)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
-            import re
-            subjects=re.findall(r'"subject"\s*:\s*"([^"]+)"',txt)
-            if not subjects:
-                lines=[l.strip().lstrip("0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>25]
-            else:
-                lines=subjects
-            lines=[l for l in lines if len(l)>20]
-            prompts=[self.build_prompt(d,False,False,self.config.get("keep_human",True),"1024x1792") for d in lines[:count]]
+            lines=[l.strip().lstrip("0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>30]
+            lines=[l for l in lines if len(l)>30][:count]
+            # 用build_prompt生成full prompt作为后备，同时把初稿作为desc
+            prompts=[self.build_prompt(lines[i] if i<len(lines) else subject,False,False,self.config.get("keep_human",True),"1024x1792") for i in range(count)]
             batch_id=self._new_batch(subject or f"场景",lines[:count])
             return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id}
         except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:120]}"}
@@ -251,13 +236,13 @@ class Backend:
 - 若原始已有人物 → 也统一删除重写为自适应风格形象
 - 硬性限制：仅限单人，远景，不特写，不生成人群，不生成写实清晰五官
 
-**优化逻辑：**
-1. 统一语序结构：镜头语言 → 美术画风 → 核心主体 → 环境空间与留白控制 → 人物设定 → 光影色彩规则 → 材质与画质
-2. 自动补充必要约束词，强化大面积留白、控制元素密度，维持画面干净通透
-3. 消除冲突参数，禁止同时出现广角/长焦、深景深/浅景深、多种光源
-4. 规范光影，锁定单一主光源，抑制杂光斑、彩色乱光
-5. 精简冗余重复词汇，拒绝无意义堆砌
-6. 根据场景自动适配材质关键词，优先低纹理密度，规避破损、锈蚀、斑驳质感
+**优化逻辑（【第三步：智能重构二次精细化优化】）：**
+1. 禁止随意增删核心画面元素
+2. 镜头自由自适应，清除矛盾镜头参数，维持大面积留白
+3. 构图自主选用平衡规整样式，杜绝失衡凌乱构图
+4. 保留远景单人约束，仅限单人、禁止特写与人群
+5. 理顺语句、剔除重复冗余词汇，强化宏大空灵氛围
+6. 画面干净通透，单一主光源，剔除杂乱彩光；材质规避锈蚀、斑驳风化
 
 **输出格式：**
 [
