@@ -331,17 +331,8 @@ class Backend:
             env="，主体悬浮于云海之上，纯净渐变天空向远方过渡，空旷大地隐入薄雾"
         # 均质基底统一收尾 — 大气透视薄霾
         env+="，轻薄大气透视薄雾，无厚重块状体积雾；近景空间通透不遮挡主体轮廓；距离越远朦胧度平缓提升，远景自然消融地平线柔和虚化；无大量丁达尔光束"
-        # ⑤ 人物策略：原文已有人物（AI优化后）则不追加
+        # ⑤ 人物由AI优化统一管理，build_prompt不干预
         neg_human=""
-        has_char=any(w in desc for w in ["人影","剪影","人物","行人","身影","背影","骑手","人","女","男","战士","骑","袍","甲","衣","帽","剑","弓","探险","装束"])
-        if has_char:
-            pass  # AI优化已处理人物，trust it
-        elif human:
-            env+=f"，画面底部边缘下三分区域仅1个渺小人类黑色剪影，背对镜头眺望主体，体型极其微小，无面部细节无服饰特征，仅作尺度标尺，不遮挡主体轮廓，不吸引视线"
-            neg_human="，无清晰人脸，无精致服饰细节，无人群聚集，无行人，无人物近景特写，无人物占据画面中心，无彩色杂乱服装"
-        else:
-            env+=f"，空无一人，无人类，无人影，不存在任何人物剪影，无行人，无生命体"
-            neg_human="，无人类，无行人，无人影，无人物剪影，无单人，无多人，无站立人影，无远处人影，无生命体"
         # ⑥ 光影色彩 — 若描述词已含光线时段则跳过
         has_light=any(w in desc for w in ["黄昏","清晨","正午","阴天","晨光","暮色","夕阳","日出","日落","午后","黎明","深夜","月光","薄雾","晴朗","多云","阴云","雨后","雪后"])
         if not has_light:
@@ -356,9 +347,9 @@ class Backend:
         # 通用基础负面词
         neg_base="，无杂乱碎片，无零散杂物，无密集植被，无过多人群，无飞鸟，无杂乱眩光，无彩色杂光斑，无锈蚀破损，无噪点，无拥挤构图，无手绘厚涂，无二次元动漫风格，无胶片粗颗粒，无风化废墟，无雕刻细节，无密集管线，无斑驳纹理"
         if is_natural:
-            p+=f"{neg_base}{neg_human}"
+            p+=f"{neg_base}"
         else:
-            p+=f"{neg_base}{neg_human}，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground, no hand painted, no thick paint, no cel shading, no sketch lines, no rough metal, no muddy ground, no moss, no cracks, no rust, no wear and tear"
+            p+=f"{neg_base}，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground, no hand painted, no thick paint, no cel shading, no sketch lines, no rough metal, no muddy ground, no moss, no cracks, no rust, no wear and tear"
         # 标注画幅尺寸
         size_map={"1024x1024":"方形构图1:1","1792x1024":"横屏宽幅16:9","1024x1792":"竖屏9:16","1344x768":"宽屏"}
         sn=size_map.get(size,"")
