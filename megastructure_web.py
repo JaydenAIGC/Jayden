@@ -30,7 +30,7 @@ class Backend:
         self.STYLE = self.STYLES.get(self.style_name, {})
     def _load_config(self):
         fp = os.path.join(BASE_DIR,"config.json")
-        d = {"llm_api_key":"","llm_base_url":"https://api.apimart.ai/v1","text_model":"deepseek-v4-flash",
+        d = {"llm_api_key":"","llm_base_url":"https://api.deepseek.com","text_model":"deepseek-v4-flash",
              "image_api_key":"","image_base_url":"https://api.apimart.ai/v1","image_model":"gpt-image-2-official",
              "poll_interval":2000,"max_polls":60,"selected_style":"太古遗迹巨构","custom_suffix":"","keep_human":True}
         if os.path.exists(fp):
@@ -572,12 +572,25 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .g-batch-subj{font-size:13px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-batch-meta{font-size:10px;color:var(--hint);white-space:nowrap}
 .g-batch-expand{font-size:10px;color:var(--hint);transition:transform .2s}
-.g-batch-body{display:none;flex-wrap:wrap;gap:6px;padding:6px 10px 10px;border-top:1px solid var(--border)}
-.g-batch-body.show{display:flex}
+.g-batch-body{display:none;padding:6px 10px 10px;border-top:1px solid var(--border)}
+.g-batch-body.show{display:block}
 .g-batch-img{width:calc(20% - 5px);min-width:120px;flex:1}
 .g-batch-img img{width:100%;height:120px;object-fit:cover;border-radius:4px;cursor:zoom-in}
 .g-batch-txt{font-size:9px;color:var(--hint);padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-batch-poem{width:100%;font-size:12px;color:var(--accent2);font-style:italic;padding:6px 0;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;line-height:1.6}
+/* 卡片式图库 */
+.g-batch-card{display:flex;gap:8px;background:var(--card);border-radius:6px;border:1px solid var(--border);overflow:hidden;margin-bottom:6px;break-inside:avoid}
+.g-batch-card:hover{border-color:var(--accent)}
+.g-batch-card img{width:120px;height:80px;object-fit:cover;flex-shrink:0;cursor:zoom-in}
+.g-batch-info{flex:1;padding:6px 8px;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.g-batch-idx{font-size:9px;color:var(--hint);font-weight:600}
+.g-batch-desc{font-size:11px;color:var(--body);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+/* 瀑布流布局 */
+.g-batch-body{display:none;padding:6px 10px 10px;border-top:1px solid var(--border)}
+.g-batch-body.show{display:block;column-count:4;column-gap:10px}
+@media(max-width:1200px){.g-batch-body.show{column-count:3}}
+@media(max-width:900px){.g-batch-body.show{column-count:2}}
+@media(max-width:600px){.g-batch-body.show{column-count:1}.g-batch-card{flex-direction:row}.g-batch-card img{width:90px;height:70px}.g-batch-desc{font-size:10px;-webkit-line-clamp:2}}
 .gallery .g-item .gp{font-size:11px;color:var(--body);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .gwrap{flex:1;overflow-y:auto;padding:12px 16px 100px;position:relative;z-index:1}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
@@ -996,26 +1009,28 @@ async function loadGallery(){
   g.innerHTML="";
   // 先显示批次
   batches.forEach(b=>{
-   const bdiv=document.createElement("div");bdiv.className="g-batch";
    const imgs=b.images||[];
-   const n=b.subject||"未命名批次";
-   const stl=b.style||"";
    const ds=b.descriptions||[];
+   const n=b.subject||"未命名批次";
+   // 批次卡片容器
+   const bdiv=document.createElement("div");bdiv.className="g-batch";
    bdiv.innerHTML=`<div class="g-batch-hd" onclick="this.nextElementSibling.classList.toggle('show')">
-    <span class="g-batch-subj">${n}</span>
-    <span class="g-batch-meta">${stl} · ${imgs.length||0}/${ds.length}图</span>
+    <span class="g-batch-subj">${b.poem||n}</span>
+    <span class="g-batch-meta">${b.style||''} · ${imgs.length}/${ds.length}图</span>
     <span class="g-batch-expand">▶</span>
    </div>
    <div class="g-batch-body${imgs.length>0?' show':''}">
-    ${b.poem?`<div class="g-batch-poem">${b.poem}</div>`:''}
-    <div style="width:100%;margin-bottom:4px">
-     <button class="btng btng-d" style="font-size:9px;padding:2px 8px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写故事':'✨ 故事开头'}</button>
+    <div style="width:100%;display:flex;gap:6px;margin-bottom:6px">
+     <button class="btng btng-d" style="font-size:9px;padding:2px 8px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写':'✨ 故事'}</button>
     </div>
-    ${imgs.map((img,i)=>`<div class="g-batch-img">
-      <img src="/api/image/history/${img.file}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomLayer').classList.add('show')" />
-      <div class="g-batch-txt">${(img.prompt||'').slice(0,60)}</div>
-     </div>`).join('')}
-    ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':''}
+    ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':
+     imgs.map((img,i)=>`<div class="g-batch-card">
+       <img src="/api/image/history/${img.file}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomLayer').classList.add('show')" />
+       <div class="g-batch-info">
+        <div class="g-batch-idx">#${i+1}</div>
+        <div class="g-batch-desc">${(img.prompt||ds[i]||'').slice(0,80)}${((img.prompt||ds[i]||'').length>80?'...':'')}</div>
+       </div>
+      </div>`).join('')}
    </div>`;
    g.appendChild(bdiv);
   });
