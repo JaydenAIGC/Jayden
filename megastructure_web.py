@@ -5,34 +5,20 @@ import os, sys, json, requests, base64, time, threading, re, glob, http.server
 from datetime import datetime
 from urllib.parse import urlparse
 
-# PyInstaller兼容：数据文件存EXE同目录，风格文件从打包目录读取
+# PyInstaller兼容
 if getattr(sys,'frozen',False):
     BASE_DIR = os.path.dirname(sys.executable)
-    STYLE_DIR = os.path.join(BASE_DIR, "styles")
-    # 首次运行：把打包内的风格文件复制到EXE同目录
-    if not os.path.exists(STYLE_DIR):
-        import shutil
-        src_styles = os.path.join(sys._MEIPASS, "styles")
-        if os.path.exists(src_styles):
-            shutil.copytree(src_styles, STYLE_DIR)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    STYLE_DIR = os.path.join(BASE_DIR, "styles")
 
 class Backend:
     def __init__(self):
         self.config = self._load_config()
-        self.STYLES = self._load_styles()
-        self.STYLE_NAMES = list(self.STYLES.keys())
-        self.style_name = self.config.get("selected_style","")
-        if self.style_name not in self.STYLE_NAMES and self.STYLE_NAMES:
-            self.style_name = self.STYLE_NAMES[0]
-        self.STYLE = self.STYLES.get(self.style_name, {})
     def _load_config(self):
         fp = os.path.join(BASE_DIR,"config.json")
         d = {"llm_api_key":"","llm_base_url":"https://api.deepseek.com","text_model":"deepseek-v4-flash",
              "image_api_key":"","image_base_url":"https://api.apimart.ai/v1","image_model":"gpt-image-2-official",
-             "poll_interval":2000,"max_polls":60,"selected_style":"太古遗迹巨构","custom_suffix":"","keep_human":False}
+             "poll_interval":2000,"max_polls":60,"custom_suffix":"","keep_human":False}
         if os.path.exists(fp):
             with open(fp,"r",encoding="utf-8") as f: c=json.load(f)
             for k in d: c.setdefault(k,d[k])
@@ -89,129 +75,63 @@ class Backend:
         self.config.update(c);
         with open(os.path.join(BASE_DIR,"config.json"),"w",encoding="utf-8") as f: json.dump(self.config,f,ensure_ascii=False,indent=2)
         return {"ok":True}
-    def create_style(self,d):
-        name=d.get("style_name","").strip()
-        if not name: return {"ok":False,"error":"名称不能为空"}
-        fp=os.path.join(BASE_DIR,"styles",f"{name}.json")
-        if os.path.exists(fp): return {"ok":False,"error":"同名风格已存在"}
-        style={
-            "style_name":name,
-            "art_style":d.get("art","cinematic environment concept art, realistic render"),
-            "style_type":"场景概念美术",
-            "render_type":"写实渲染",
-            "base_positive":d.get("positive","超广角大全景，低角度仰拍，纵深透视，大气透视，电影级布光"),
-            "base_negative":d.get("negative","卡通，二次元，鲜艳高饱和，干净崭新建筑"),
-            "style_keywords_short":d.get("category","自定义"),
-            "core_mood":"自定义氛围",
-            "scene_category":[d.get("category","自定义")],
-            "dynamic_subject_generate_prompt":d.get("gen_prompt","生成巨构场景主体"),
-            "camera_settings":{"lens_type":"超广角","perspective":"低角度","shot_type":"全景","depth_of_field":"远景清晰","composition_rule":"主体占大部分画面"},
-            "light_atmosphere":{"light_type":"侧逆光","time_preference":"黄昏","atmosphere_effect":"薄雾","forbidden_light":"平光"},
-            "material_texture":{"main_material":"风化石材","surface_feature":"风化痕迹","avoid_material":"抛光材质"},
-            "color_system":{"base_tone":"低灰度","main_color":"中性色","accent_color":"微弱暖光","color_rule":"低饱和"},
-            "sampler_config":{"sampler":"dpmpp_2m","scheduler":"karras","steps":24,"cfg_scale":7,"width":1792,"height":1024},
-            "caption_group":{"short_text":f"{name} #概念艺术","medium_text":f"{name}场景静静矗立","long_text":f"{name}宏大场景，感受史诗氛围","hashtags":["概念场景","AI绘画"]},
-            "bgm_keywords":"epic ambient, lonely orchestral",
-            "config_note":f"通过页面创建的{name}风格"
-        }
-        with open(fp,"w",encoding="utf-8") as f: json.dump(style,f,ensure_ascii=False,indent=2)
-        self.STYLES=self._load_styles()
-        self.STYLE_NAMES=list(self.STYLES.keys())
-        return {"ok":True}
     def get_init(self):
-        return {"names":self.STYLE_NAMES,"selected":self.style_name,"style":self.STYLE,
-                "config":{k:self.config[k] for k in ["llm_api_key","llm_base_url","text_model","image_api_key","image_base_url","image_model","custom_suffix","selected_style","keep_human"]}}
-    def gen_subject_ideas(self,style_name=""):
+        return {"config":{k:self.config[k] for k in ["llm_api_key","llm_base_url","text_model","image_api_key","image_base_url","image_model","custom_suffix","keep_human"]}}
+    def gen_subject_ideas(self):
         try:
-            sty=self.STYLES.get(style_name,{}) if style_name else {}
-            kw=sty.get("style_keywords_short","") or ""
-            mood=sty.get("core_mood","") or ""
-            mat=sty.get("material_texture",{}).get("main_material","") or ""
-            ctx=f"【风格关键词】{kw}\n【风格氛围】{mood}\n【核心材质】{mat}"
-            prompt=f"""你是史诗场景创意大师，专精于营造孤寂、震撼、空旷的视觉氛围。当前风格「{style_name}」，风格特征如下：
-{ctx}
-请输出5个JSON对象，每行一个，严格遵循以下格式，不要任何多余文字：
-{{"subject":"环境地貌+巨型主体建筑+空间位置形态","target_style":"{style_name}"}}
-
-写作规范：
-- 长度充足，禁止短句
-- 句式：环境地貌 + 巨型主体建筑 + 空间位置形态
-- ⚠️ 核心情绪：孤寂、空旷、压迫感——通过巨大 vs 渺小的对比来制造震撼
-- 关键词取向：苍凉、荒芜、沉默、无垠、沉寂、肃穆、萧瑟、死寂
-- 禁止人物、特写、小型物件
-- target_style必须严格等于"{style_name}"，一字不差
-
-合格示例：
-{{"subject":"茫茫冰原深处，冰封已久的巨型环形石质堡垒静静矗立峡谷，万籁俱寂中唯有寒风呼啸","target_style":"{style_name}"}}"""
+            prompt="""你是一位史诗场景创意大师。请输出5个场景主体，每行一个，不要JSON不要编号。
+每个主体格式：环境地貌 + 巨型主体建筑，20-40字。
+风格：孤寂、空旷、苍凉、沉默。
+示例：茫茫冰原深处矗立一座冰封的环形石质堡垒"""
             h=self._headers("llm")
-            for attempt in range(3):
-                p={"model":self.config.get("text_model","deepseek-v4-flash"),
-                   "messages":[{"role":"user","content":prompt}],
-                   "max_tokens":600,"temperature":0.8}
-                r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=30)
-                r.raise_for_status()
-                txt=r.json()["choices"][0]["message"]["content"]
-                import re
-                subs=re.findall(r'"subject"\s*:\s*"([^"]+)"',txt)
-                styles=re.findall(r'"target_style"\s*:\s*"([^"]+)"',txt)
-                # 校验 target_style 必须匹配选中风格
-                valid=[]
-                for i,s in enumerate(subs):
-                    ts=styles[i] if i<len(styles) else ""
-                    if not style_name or ts==style_name:
-                        valid.append(s)
-                if valid: return {"ok":True,"ideas":valid[:5],"style_ok":len(valid)==len(subs)}
-                prompt='上次输出风格不匹配，请严格确保target_style="'+style_name+'"。只输出JSON：\n{"subject":"...","target_style":"'+style_name+'"}\n每行一个，共5个。'
-            return {"ok":False,"error":"LLM三次风格均不匹配"}
-        except Exception as e: return {"ok":False,"error":f"灵感生成异常: {str(e)[:80]}"}
-    def gen_desc(self,subject,count,rotate=False,style_name=""):
-        if rotate and self.STYLE_NAMES:
-            self._ri=getattr(self,'_ri',0)+1
-            hint=self.STYLE_NAMES[(self._ri-1)%len(self.STYLE_NAMES)]
-        else: hint=""
-        sty=self.STYLES.get(style_name,{}) if style_name else {}
-        mood=sty.get("core_mood","") or ""
+            p={"model":self.config.get("text_model","deepseek-v4-flash"),
+               "messages":[{"role":"user","content":prompt}],
+               "max_tokens":400,"temperature":0.8}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=30)
+            r.raise_for_status()
+            txt=r.json()["choices"][0]["message"]["content"]
+            lines=[l.strip().strip("\"'0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>10]
+            if not lines: return {"ok":False,"error":"无结果"}
+            return {"ok":True,"ideas":lines[:5]}
+        except Exception as e: return {"ok":False,"error":f"异常: {str(e)[:80]}"}
+    def gen_desc(self,subject,count,rotate=False):
         if subject:
             ins=f"""围绕主题「{subject}」生成{count}条场景描述JSON，每行一个：
-{{"subject":"场景描述文本","target_style":"{style_name}"}}
+{{"subject":"场景描述文本"}}
 
-面向gpt-image-2绘图模型优化，核心规则（必须遵守）：
-- ⚠️ **同环境同主体**：{count}条必须是**同一地貌环境+同一建筑主体**，地貌（冰原/沙漠/深海等）和建筑都不能变
-- ⚠️ **共性原则**：地貌环境、建筑形态、结构细节（拱门/石柱/穹顶/台阶等）、材质（石料/锈蚀/风化等）、色调、光线时段必须**完全一致**
-- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼→俯瞰，但环境和建筑本身不能变
+面向绘图模型优化，核心规则（必须遵守）：
+- ⚠️ **同氛围多样主体**：{count}条共享**同一地貌环境+同一情绪氛围**，但**建筑主体可以不同**（如环形堡垒/斜塔/浮空岛/拱门/巨像等多样化）
+- ⚠️ **共性原则**：地貌环境、材质（石料/锈蚀/风化等）、色调、光线时段、情绪氛围必须**完全一致**
+- ✅ **主体可以多样化**：每条选用不同的建筑形态（环形结构/尖塔/穹顶/拱桥/平台等），丰富不单调
 - ⚠️ 禁止环境变化——第一条是冰原雪地，后面就不能变成沙漠或戈壁
-- ⚠️ 禁止生成完全不同场景——比如第一条写了石质拱门建筑，后面就不能变成金属塔楼或完全不同构造
-- 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境来制造压迫感
+- 核心情绪：孤寂、震撼、空旷
 - 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声、无垠
-- subject要求**100-150字**，强化：空间层次（前后远近）、材质质感（石材纹理/风化/锈蚀）、光线方向与色温
-- ⚠️ **句式差异化**：每条的后半段不能相同，避免出现"立于……之中""静静矗立于……"等雷同收尾
-- ⚠️ **每条要有不同的收尾方式**：有的聚焦光影，有的聚焦空间纵深，有的聚焦材质细节
+- subject要求**80-120字**，强化：空间层次、材质质感、光线方向与色温
+- ⚠️ **句式差异化**：每条的后半段不能相同，不能都以"立于……之中""静静矗立于……"等收尾
 - **全程用中文描述，不要夹杂英文**
 - 禁止人物、特写、小型物件（人物由「✨AI优化」步骤统一添加）
 - 禁止短句、禁止笼统概括"""
         else:
-            ins=f"""当前风格「{style_name}」氛围：{mood}。生成{count}条场景描述JSON，每行一个：
-{{"subject":"场景描述文本","target_style":"{style_name}"}}
+            ins=f"""生成{count}条场景描述JSON，每行一个：
+{{"subject":"场景描述文本"}}
 
-面向gpt-image-2绘图模型优化，核心规则（必须遵守）：
-- ⚠️ **同环境同主体**：{count}条必须是**同一地貌环境+同一建筑主体**，都不能变
-- ⚠️ **共性原则**：地貌、建筑形态、结构细节、材质、色调、光线时段必须**完全一致**
-- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼
-- ⚠️ 禁止环境变化，禁止生成完全不同场景
-- 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境制造压迫感
+面向绘图模型优化，核心规则（必须遵守）：
+- ⚠️ **同氛围多样主体**：{count}条共享**同一地貌环境+同一情绪氛围**，但**建筑主体可以不同**
+- ⚠️ **共性原则**：地貌、材质、色调、光线时段必须**完全一致**
+- ✅ **主体可以多样化**：每条选用不同的建筑形态，丰富不单调
+- ⚠️ 禁止环境变化
+- 核心情绪：孤寂、震撼、空旷
 - 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声
-- subject要求**100-150字**，强化：空间层次、材质质感、光线方向与色温
-- ⚠️ **句式差异化**：每条的后半段不能相同，不能都以"静静矗立在……"收尾
-- ⚠️ **每条收尾方式不同**：光影、纵深、材质细节各选其一
+- subject要求**80-120字**，强化：空间层次、材质质感、光线方向与色温
+- ⚠️ **句式差异化**：每条的后半段不能相同
 - **全程用中文描述，不要夹杂英文**
-- target_style必须="{style_name}"
 - 禁止人物、特写、小型物件（人物由「✨AI优化」步骤统一添加）
 - 禁止短句、禁止笼统概括"""
         try:
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
-               "messages":[{"role":"user","content":ins}],"max_tokens":8192,"temperature":0.5}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=60)
+               "messages":[{"role":"user","content":ins}],"max_tokens":8192,"temperature":0.8}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=60)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
             import re
@@ -221,18 +141,16 @@ class Backend:
             else:
                 lines=subjects
             lines=[l for l in lines if len(l)>20]
-            # 对每条描述词构建完整Prompt
             prompts=[self.build_prompt(d,False,False,self.config.get("keep_human",True),"1024x1792") for d in lines[:count]]
-            # 创建批次
-            batch_id=self._new_batch(subject or f"{style_name}场景",style_name,lines[:count])
-            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"hint":hint,"batch_id":batch_id}
+            batch_id=self._new_batch(subject or f"场景",lines[:count])
+            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id}
         except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:120]}"}
     def gen_one_desc(self):
         try:
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
                "messages":[{"role":"user","content":"""输出一个JSON格式的巨构场景描述，不要任何多余文字：
-{"subject":"场景描述文本","target_style":"风格名称"}
+{"subject":"场景描述文本"}
 
 写作规范：
 - 句式：环境地貌 + 巨型主体建筑 + 空间位置形态
@@ -363,13 +281,15 @@ class Backend:
             return {"ok":True,"optimized":optimized[:len(descs)],"negatives":negatives}
         except Exception as e: return {"ok":False,"error":f"优化异常: {str(e)[:80]}"}
     def build_prompt(self,desc,comp=False,light=False,human=True,size="1024x1792"):
-        bp=self.STYLE.get("base_positive",""); art=self.STYLE.get("art_style","")
+        # 统一画风体系：不依赖风格文件
+        d=desc.lower()
         if comp:
             comps=["轻微偏移中心构图，建筑偏左放置","俯仰角度微调，镜头略向下倾斜","水平线偏移，建筑偏右占据2/3画面","画面轻微旋转，增加不稳定感"]
-            bp+=f"，{__import__('random').choice(comps)}"
+            # 直接加进desc但不改变结构
+            desc+=f"，{__import__('random').choice(comps)}"
         if light:
             lights=["晨雾浓度增加，光线更柔和","暮色更深，冷蓝色调为主","霞光增强，金色轮廓光更明显","阴沉天光，无直射光，漫反射为主","薄暮时分，天边残留微弱暖光"]
-            bp+=f"，{__import__('random').choice(lights)}"
+            desc+=f"，{__import__('random').choice(lights)}"
         # 场景分类：巨构式「虚无干净」vs 自然场景「有序干净」
         d=desc.lower()
         is_natural=any(w in d for w in ["森林","林","树","丛林","海岸","沙滩","海滩","古","中式","东方","庙","塔","宫","亭","阁","花","草","山"])
@@ -428,8 +348,8 @@ class Backend:
         light_color="单侧柔和漫射光，单一光源，无杂乱多重光斑，低饱和统一色调，色彩克制，整体色调协调统一，均匀通透光线，无强烈硬阴影，无死黑死角"
         # ⑦ 画质+光学
         quality="8K超写实渲染，细腻干净纹理，画面通透，电影级渲染，柔和光学效果，无杂乱眩光，无零散星芒，无色散"
-        # 组装完整prompt：通用骨架+场景变量
-        p=f"{desc}, {art}, {bp}" if art else desc
+        # 组装完整prompt：desc + 所有模块
+        p=desc
         p+=f"，{lens}，{style_tag}，{env}，{light_color}，{quality}"
         # 通用基础负面词
         neg_base="，杂乱碎片，大量零散物体，密集植被，过多人群，四处飘散的飞鸟，杂乱眩光，彩色杂光斑，严重破损锈蚀，噪点，拥挤构图，手绘厚涂，二次元动漫，胶片粗颗粒，风化破损废墟，大量雕刻细节，密集管线，斑驳纹理"
@@ -574,10 +494,6 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
             elif p=="/api/save_config": resp=backend.save_config(data)
             elif p=="/api/gen_marketing": resp=backend.gen_marketing(data.get("subject",""),data.get("desc",""))
             elif p=="/api/gen_batch_poem": resp=backend.gen_batch_poem(data.get("batch_id",""))
-            elif p=="/api/set_style":
-                backend.style_name=data.get("name","");backend.STYLE=backend.STYLES.get(backend.style_name,{});
-                backend.config["selected_style"]=backend.style_name;backend.save_config(backend.config);resp={"ok":True}
-            elif p=="/api/create_style": resp=backend.create_style(data)
             else: resp={"ok":False,"error":"unknown"}
         except Exception as e: resp={"ok":False,"error":str(e)[:200]}
         self._json(resp)
@@ -771,8 +687,6 @@ body{font-size:13px;overflow:auto}
 <body>
 <div class="header">
  <h1>街灯AI--场景生成器</h1>
- <select id="styleSelect" onchange="setStyle(this.value)"></select>
- <button class="btng btng-d" style="font-size:10px;padding:2px 8px" onclick="showNewStyle()">+新建</button>
  <label style="font-size:11px;color:var(--hint);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" id="autoRotate" checked />轮换</label>
  <label style="font-size:11px;color:var(--hint);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" id="autoSwitch" />自动</label>
  <div style="flex:1"></div>
@@ -831,14 +745,11 @@ async function api(path,data){
  const r=await fetch(path,{method:data?"POST":"GET",headers:{"Content-Type":"application/json"},body:data?JSON.stringify(data):null});
  const j=await r.json();console.log("api resp:",path,j);return j}
 async function init(){
- const r=await api("/api/init");STYLES=r.names||[];CONFIG=r.config||{};
- const sel=document.getElementById("styleSelect");
- sel.innerHTML=STYLES.map(n=>`<option value="${n}"${n==r.selected?" selected":""}>${n}</option>`).join("");
+ const r=await api("/api/init");CONFIG=r.config||{};
  // 回填后缀
  const si=document.getElementById("sfxInp");
  if(CONFIG.custom_suffix){si.value=CONFIG.custom_suffix}
  HUMAN=CONFIG.keep_human!==false;
- const hb=document.getElementById("humanBtn");
  // 加载图库数量
  try{const g=await api("/api/list_images");const gc=document.getElementById("galleryCount");if(gc&&g.images){gc.textContent=g.images.length>0?`(${g.images.length})`:""}}catch(e){}
 }init();
@@ -871,13 +782,9 @@ function togglePrompt(i){
 async function genIdeas(){
  const btn=document.getElementById("ideaBtn");btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
  try{
-  const style=document.getElementById("styleSelect").value;
-  const r=await api("/api/gen_ideas",{style:style});
-  console.log("genIdeas response:",r);
+  const r=await api("/api/gen_ideas");
   if(!r.ok){st("灵感失败: "+(r.error||"无返回"),"var(--warn)");btn.disabled=false;btn.innerHTML="💡灵感";return}
   if(!r.ideas||!r.ideas.length){st("灵感失败: AI返回为空","var(--warn)");btn.disabled=false;btn.innerHTML="💡灵感";return}
-  // style_ok=false表示风格不匹配已自动重试，轻提示通知用户
-  if(r.style_ok===false){st("题材匹配异常，已自动重新生成","var(--warn)")}
   document.getElementById("subjInp").value=r.ideas[Math.floor(Math.random()*r.ideas.length)];
   st("灵感已填入","var(--accent2)");
  }catch(e){
@@ -929,11 +836,6 @@ async function genIdeas(){
   <button class="btng btng-d" style="font-size:11px;padding:4px 10px" onclick="redoAll()">全部重写</button>
   <span style="font-size:9px;color:var(--hint);margin-left:auto">双击描述词可编辑</span>`;
  st(`已生成 ${r.descriptions.length} 条`,"var(--accent2)");
- if(r.hint&&r.hint!=document.getElementById("styleSelect").value){
-  if(document.getElementById("autoSwitch").checked){
-   document.getElementById("styleSelect").value=r.hint;setStyle(r.hint)
-  }else{st(`偏向「${r.hint}」可切换风格`,"var(--accent2)")}
- }
  }catch(e){st("异常: "+e.message,"var(--warn)");document.getElementById("genBtn").disabled=false;document.getElementById("genBtn").innerHTML="批量生成"}
 }
 function editDesc(i){
@@ -973,19 +875,14 @@ async function optimizeAll(){
  if(btn){btn.disabled=true;btn.innerHTML='<span class="loading"></span>'}
  st("智能优化Prompt中...","var(--accent)");
  const descs=CARDS.map(c=>c.prompt||c.desc);
- const r=await api("/api/optimize",{descriptions:descs,style:document.getElementById("styleSelect").value});
+ const r=await api("/api/optimize",{descriptions:descs});
  if(btn){btn.disabled=false;btn.innerHTML="✨AI优化"}
  if(!r.ok||!r.optimized){st("优化失败: "+(r.error||"未知"),"var(--warn)");return}
  for(let i=0;i<r.optimized.length&&i<CARDS.length;i++){
   const full=r.optimized[i];
-  const neg=r.negatives?.[i]||"";
   const short=full.length>80?full.slice(0,77)+'...':full;
   CARDS[i].desc=short;CARDS[i].prompt=full;
   document.getElementById("desc"+i).textContent=short;
-  const tags=document.getElementById("tags"+i);
-  if(tags&&neg){
-   tags.innerHTML+=` ⛔${neg.slice(0,20)}...`;
-  }
  }
  st("优化完成 "+r.optimized.length+" 条","var(--accent2)");
 }
@@ -1037,49 +934,7 @@ async function genBatchPoem(bid){
   loadGallery();
  }catch(e){st("出错: "+e.message,"var(--warn)");btn.disabled=false;btn.innerHTML='✨ 故事开头'}
 }
-function showNewStyle(){
- const c=CONFIG||{};
- document.getElementById("setContent").innerHTML=`
-  <h3 style="margin-bottom:10px;font-size:14px;font-weight:700;color:var(--text)">新建风格</h3>
-  <div class="mg"><label style="font-weight:600;color:var(--accent2);font-size:11px">📌 基础信息</label></div>
-  <div class="mg"><label>风格名称 *</label><input id="ns_name" placeholder="如：赛博朋克都市"/></div>
-  <div class="mg"><label>题材分类（逗号分隔）</label><input id="ns_cat" placeholder="废土, 赛博, 奇幻"/></div>
-  <div class="mg" style="margin-top:8px"><label style="font-weight:600;color:var(--accent2);font-size:11px">🎨 画面描述</label></div>
-  <div class="mg"><label>art_style（英文风格）</label><input id="ns_art" value="cinematic environment concept art, realistic render"/></div>
-  <div class="mg"><label>base_positive（正向提示词）</label><input id="ns_pos" value="超广角大全景，低角度仰拍，纵深透视，大气透视，电影级布光，概念场景设计，写实渲染，8K"/></div>
-  <div class="mg"><label>base_negative（负面提示词）</label><input id="ns_neg" value="卡通，二次元，鲜艳高饱和，干净崭新建筑，平光，畸变"/></div>
-  <div class="mg" style="margin-top:8px"><label style="font-weight:600;color:var(--accent2);font-size:11px">🤖 AI 生成</label></div>
-  <div class="mg"><label>AI主体生成指令</label><input id="ns_gen" value="生成一句20-30字的场景主体，包含地貌+建筑+空间位置"/></div>
-  <div class="modal-acts" style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-   <button class="btng btng-s" onclick="document.getElementById('setMod').classList.remove('show')">取消</button>
-   <button class="btng btng-p" onclick="saveNewStyle()">创建风格</button>
-  </div>`;
- document.getElementById("setMod").classList.add("show");
-}
-async function saveNewStyle(){
- const name=document.getElementById("ns_name").value.trim();
- if(!name){st("请填写风格名称","var(--warn)");return}
- const r=await api("/api/create_style",{
-  style_name:name,
-  category:document.getElementById("ns_cat").value||"自定义",
-  art:document.getElementById("ns_art").value||"cinematic environment concept art",
-  positive:document.getElementById("ns_pos").value||"超广角大全景",
-  negative:document.getElementById("ns_neg").value||"卡通，二次元",
-  gen_prompt:document.getElementById("ns_gen").value||"生成场景主体"
- });
- if(!r.ok){st("创建失败: "+(r.error||""),"var(--warn)");return}
- document.getElementById("setMod").classList.remove("show");
- // 刷新风格下拉
- const ri=await api("/api/init");
- if(ri.names){
-  const sel=document.getElementById("styleSelect");
-  sel.innerHTML=ri.names.map(n=>`<option value="${n}"${n==name?" selected":""}>${n}</option>`).join("");
-  setStyle(name);
- }
- st("已创建: "+name,"var(--accent2)");
-}
 function saveAll(){CARDS.forEach((c,i)=>{if(c.img)saveImg(i)})}
-async function setStyle(n){await api("/api/set_style",{name:n});st("已切换: "+n,"var(--accent2)")}
 
 function showTab(t){
  document.getElementById("tabGen").className="tab"+(t=="gen"?" act":"");
@@ -1089,7 +944,8 @@ function showTab(t){
  if(t=="lib")loadGallery(document.getElementById('gSortBtn')?.dataset?.order||'');
 }
 
-async function loadGallery(){
+async function loadGallery(order){
+ order=order||document.getElementById('gSortBtn')?.dataset?.order||'newest';
  const g=document.getElementById("gallery");g.innerHTML="<span style='color:var(--hint)'>加载中...</span>";
  try{
   // 同时加载批次和图片
