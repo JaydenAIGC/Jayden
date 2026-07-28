@@ -32,7 +32,7 @@ class Backend:
         fp = os.path.join(BASE_DIR,"config.json")
         d = {"llm_api_key":"","llm_base_url":"https://api.deepseek.com","text_model":"deepseek-v4-flash",
              "image_api_key":"","image_base_url":"https://api.apimart.ai/v1","image_model":"gpt-image-2-official",
-             "poll_interval":2000,"max_polls":60,"selected_style":"太古遗迹巨构","custom_suffix":"","keep_human":True}
+             "poll_interval":2000,"max_polls":60,"selected_style":"太古遗迹巨构","custom_suffix":"","keep_human":False}
         if os.path.exists(fp):
             with open(fp,"r",encoding="utf-8") as f: c=json.load(f)
             for k in d: c.setdefault(k,d[k])
@@ -187,7 +187,7 @@ class Backend:
 - ⚠️ **句式差异化**：每条的后半段不能相同，避免出现"立于……之中""静静矗立于……"等雷同收尾
 - ⚠️ **每条要有不同的收尾方式**：有的聚焦光影，有的聚焦空间纵深，有的聚焦材质细节
 - **全程用中文描述，不要夹杂英文**
-- 禁止人物、特写、小型物件（人物由后续优化步骤统一添加）
+- 禁止人物、特写、小型物件（人物由「✨AI优化」步骤统一添加）
 - 禁止短句、禁止笼统概括"""
         else:
             ins=f"""当前风格「{style_name}」氛围：{mood}。生成{count}条场景描述JSON，每行一个：
@@ -205,7 +205,7 @@ class Backend:
 - ⚠️ **每条收尾方式不同**：光影、纵深、材质细节各选其一
 - **全程用中文描述，不要夹杂英文**
 - target_style必须="{style_name}"
-- 禁止人物、特写、小型物件（人物由后续优化步骤统一添加）
+- 禁止人物、特写、小型物件（人物由「✨AI优化」步骤统一添加）
 - 禁止短句、禁止笼统概括"""
         try:
             h=self._headers("llm")
@@ -237,7 +237,7 @@ class Backend:
 写作规范：
 - 句式：环境地貌 + 巨型主体建筑 + 空间位置形态
 - 长度60-100字，包含：建筑形态、材质纹理、光线氛围、空间尺度
-- 只描述宏观全景，禁止人物、特写、小型物件
+- 只描述宏观全景，禁止人物、特写、小型物件（由AI优化统一添加）
 - 影视概念原画叙事感
 - 禁止短句"""}],
                "max_tokens":400,"temperature":0.9}
@@ -588,21 +588,20 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .gallery.show{display:block}
 .gallery .g-item{display:flex;margin:0 0 10px 0;background:var(--card);border-radius:8px;border:1px solid var(--border);overflow:hidden;cursor:pointer;gap:0}
 .gallery .g-item:hover{border-color:var(--accent)}
-.gallery .g-item img{width:160px;height:100px;object-fit:cover;flex-shrink:0;cursor:zoom-in}
+.gallery .g-item img{width:160px;height:auto;max-height:120px;object-fit:contain;flex-shrink:0;cursor:zoom-in}
 .gallery .g-item .g-info{flex:1;padding:8px 10px;overflow:hidden;display:flex;flex-direction:column;gap:4px}
 .gallery .g-item .gl{font-size:10px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gallery .g-item .gp{font-size:11px;color:var(--body);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 /* 批次图库 */
-.g-batch{margin:0 0 8px 0;background:var(--card);border-radius:8px;border:1px solid var(--border);overflow:hidden}
-.g-batch-hd{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;user-select:none}
+.g-batch{margin:0 0 16px 0;background:var(--card);border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.g-batch-hd{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;user-select:none}
 .g-batch-hd:hover{background:var(--surf)}
-.g-batch-subj{font-size:13px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.g-batch-meta{font-size:10px;color:var(--hint);white-space:nowrap}
-.g-batch-expand{font-size:10px;color:var(--hint);transition:transform .2s}
-.g-batch-body{display:none;padding:6px 10px 10px;border-top:1px solid var(--border)}
+.g-batch-subj{font-size:15px;font-weight:700;color:var(--accent2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-batch-meta{font-size:11px;color:var(--hint);white-space:nowrap}
+.g-batch-expand{font-size:11px;color:var(--hint);transition:transform .2s}
+.g-batch-body{display:none;padding:10px 14px 14px;border-top:1px solid var(--border)}
 .g-batch-body.show{display:block}
-.g-batch-img{width:calc(20% - 5px);min-width:120px;flex:1}
-.g-batch-img img{width:100%;height:120px;object-fit:cover;border-radius:4px;cursor:zoom-in}
+.g-batch-poem{font-size:13px;color:var(--text);font-style:italic;padding:8px 14px;text-align:center;border-bottom:1px solid var(--border);line-height:1.7;background:rgba(108,92,231,.04)}
 .g-batch-txt{font-size:9px;color:var(--hint);padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-batch-poem{width:100%;font-size:12px;color:var(--accent2);font-style:italic;padding:6px 0;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;line-height:1.6}
 /* 图库工具栏 */
@@ -612,7 +611,7 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 /* 卡片式图库 */
 .g-batch-card{display:flex;gap:8px;background:var(--card);border-radius:6px;border:1px solid var(--border);overflow:hidden;margin-bottom:6px;break-inside:avoid}
 .g-batch-card:hover{border-color:var(--accent)}
-.g-batch-card img{width:120px;height:80px;object-fit:cover;flex-shrink:0;cursor:zoom-in}
+.g-batch-card img{width:120px;height:auto;max-height:90px;object-fit:contain;flex-shrink:0;cursor:zoom-in}
 .g-batch-info{flex:1;padding:6px 8px;display:flex;flex-direction:column;gap:3px;overflow:hidden}
 .g-batch-idx{font-size:9px;color:var(--hint);font-weight:600}
 .g-batch-desc{font-size:11px;color:var(--body);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
@@ -758,7 +757,6 @@ body{font-size:13px;overflow:auto}
   <div class="row">
    <button class="btng btng-d" onclick="toggleComp()" id="compBtn">构图微调</button>
    <button class="btng btng-d" onclick="toggleLight()" id="lightBtn">光影微调</button>
-   <button class="btng btng-d" onclick="toggleHuman()" id="humanBtn">👤剪影</button>
   </div>
  </div>
 </div>
@@ -781,7 +779,6 @@ async function init(){
  if(CONFIG.custom_suffix){si.value=CONFIG.custom_suffix}
  HUMAN=CONFIG.keep_human!==false;
  const hb=document.getElementById("humanBtn");
- if(hb){hb.style.borderColor=HUMAN?"var(--accent2)":"var(--border)";hb.style.color=HUMAN?"var(--accent2)":"var(--hint)"}
  // 加载图库数量
  try{const g=await api("/api/list_images");const gc=document.getElementById("galleryCount");if(gc&&g.images){gc.textContent=g.images.length>0?`(${g.images.length})`:""}}catch(e){}
 }init();
@@ -791,10 +788,7 @@ function toggleComp(){COMP=!COMP;document.getElementById("compBtn").style.border
 function toggleLight(){LIGHT=!LIGHT;document.getElementById("lightBtn").style.borderColor=LIGHT?"var(--accent2)":"var(--border)";document.getElementById("lightBtn").style.color=LIGHT?"var(--accent2)":"var(--hint)"}
 function toggleAdv(){const p=document.getElementById("advPanel");const b=document.getElementById("advBtn");p.classList.toggle("show");b.textContent=p.classList.contains("show")?"⚙收起":"⚙高级";}
 function toggleHuman(){
- HUMAN=!HUMAN;const el=document.getElementById("humanBtn");
- el.style.borderColor=HUMAN?"var(--accent2)":"var(--border)";el.style.color=HUMAN?"var(--accent2)":"var(--hint)";
- CONFIG.keep_human=HUMAN;api("/api/save_config",CONFIG);
-}
+}// 剪影按钮已移除，AI优化已自动带人
 function toggleSfx(el){
  el.classList.toggle("sel");
  const vals=[].map.call(document.querySelectorAll(".chip.sel"),c=>c.dataset.val).filter(Boolean);
@@ -863,7 +857,6 @@ async function genIdeas(){
    </div>
    <div class="prev" id="prev${i}"><span class="ph">等待生图...</span></div>
    <div class="card-tags" id="tags${i}">
-    <span style="color:${HUMAN?'var(--accent2)':'var(--hint)'}">👤${HUMAN?'开':'关'}</span>
     <span>📐${document.getElementById('sizeSelect')?.value||'9:16'}</span>
    </div>
   `;
@@ -924,8 +917,10 @@ async function optimizeAll(){
  if(btn){btn.disabled=false;btn.innerHTML="✨AI优化"}
  if(!r.ok||!r.optimized){st("优化失败: "+(r.error||"未知"),"var(--warn)");return}
  for(let i=0;i<r.optimized.length&&i<CARDS.length;i++){
-  CARDS[i].desc=r.optimized[i];CARDS[i].prompt=r.prompts?.[i]||r.optimized[i];
-  document.getElementById("desc"+i).textContent=CARDS[i].desc;
+  const full=r.optimized[i];
+  const short=full.length>80?full.slice(0,77)+'...':full;
+  CARDS[i].desc=short;CARDS[i].prompt=full;
+  document.getElementById("desc"+i).textContent=short;
   // 显示人物和构图信息
   const tags=document.getElementById("tags"+i);
   if(tags){
@@ -1066,13 +1061,14 @@ async function loadGallery(){
    // 批次卡片容器
    const bdiv=document.createElement("div");bdiv.className="g-batch";
    bdiv.innerHTML=`<div class="g-batch-hd" onclick="this.nextElementSibling.classList.toggle('show')">
-    <span class="g-batch-subj">${b.poem||n}</span>
+    <span class="g-batch-subj">${n}</span>
     <span class="g-batch-meta">${b.style||''} · ${imgs.length}/${ds.length}图</span>
     <span class="g-batch-expand">▶</span>
    </div>
+   ${b.poem?`<div class="g-batch-poem">${b.poem}</div>`:''}
    <div class="g-batch-body${imgs.length>0?' show':''}">
-    <div style="width:100%;display:flex;gap:6px;margin-bottom:6px">
-     <button class="btng btng-d" style="font-size:9px;padding:2px 8px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写':'✨ 故事'}</button>
+    <div style="width:100%;display:flex;gap:6px;margin-bottom:8px">
+     <button class="btng btng-d" style="font-size:9px;padding:3px 10px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写故事':'✨ 生成故事'}</button>
     </div>
     ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':
      imgs.map((img,i)=>`<div class="g-batch-card">
@@ -1086,6 +1082,27 @@ async function loadGallery(){
    g.appendChild(bdiv);
   });
   // 旧版无批次图片也显示
+  const batchedFiles=new Set();
+  batches.forEach(b=>(b.images||[]).forEach(img=>batchedFiles.add(img.file)));
+  const orphanImages=allImages.filter(img=>!batchedFiles.has(img.name));
+  if(orphanImages.length>0){
+   const od=document.createElement("div");od.className="g-batch";
+   od.innerHTML=`<div class="g-batch-hd" onclick="this.nextElementSibling.classList.toggle('show')">
+    <span class="g-batch-subj">📁 未归类素材</span>
+    <span class="g-batch-meta">${orphanImages.length}张</span>
+    <span class="g-batch-expand">▶</span>
+   </div>
+   <div class="g-batch-body show">
+    ${orphanImages.map(img=>`<div class="g-batch-card">
+      <img src="${img.url}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomLayer').classList.add('show')" />
+      <div class="g-batch-info">
+       <div class="g-batch-idx">${img.name}</div>
+       <div class="g-batch-desc">${(img.prompt||'').slice(0,80)}</div>
+      </div>
+     </div>`).join('')}
+   </div>`;
+   g.appendChild(od);
+  }
   // 更新数量
  }catch(e){g.innerHTML="<span style='color:var(--hint)'>加载失败: "+e.message+"</span>"}
  const gc=document.getElementById("galleryCount");
