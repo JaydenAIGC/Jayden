@@ -262,7 +262,7 @@ class Backend:
 {txt}
 
 只输出JSON数组，不要多余文字"""}],
-               "max_tokens":1024,"temperature":0.3}
+               "max_tokens":2048,"temperature":0.3}
             r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=25)
             r.raise_for_status()
             raw=r.json()["choices"][0]["message"]["content"]
@@ -277,8 +277,15 @@ class Backend:
                         negatives.append(item.get("negative",""))
                 except: pass
             if not optimized:
-                lines=[l.strip() for l in raw.split("\n") if l.strip() and len(l)>20]
-                optimized=lines[:len(descs)]
+                # fallback: 如果JSON解析失败，尝试提取prompt字段
+                prompts_raw=re.findall(r'"prompt"\s*:\s*"([^"]+)"',raw)
+                if prompts_raw:
+                    optimized=prompts_raw[:len(descs)]
+                else:
+                    lines=[l.strip() for l in raw.split("\n") if l.strip() and len(l)>20]
+                    optimized=lines[:len(descs)]
+            if not optimized:
+                return {"ok":True,"optimized":descs,"negatives":[]}
             return {"ok":True,"optimized":optimized[:len(descs)],"negatives":negatives}
         except Exception as e: return {"ok":False,"error":f"优化异常: {str(e)[:80]}"}
     def build_prompt(self,desc,comp=False,light=False,human=True,size="1024x1792"):
