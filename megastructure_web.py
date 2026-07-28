@@ -528,6 +528,14 @@ body{font-size:13px;overflow:auto}
 .bar{flex-wrap:wrap;gap:4px;padding:6px 8px;justify-content:center}
 .bar .btng{font-size:10px!important;padding:3px 8px!important}
 .bbar{bottom:8px}.bbar .btng{font-size:10px!important;padding:4px 10px!important}
+.bbar-main{flex-wrap:wrap;gap:5px;padding:8px 10px;width:96vw;justify-content:center}
+.bbar-main input{width:100%!important;font-size:14px!important;padding:8px 10px!important}
+.bbar-main .cnt{width:50px!important;min-width:50px!important}
+.bbar select{font-size:12px!important;padding:6px 8px!important}
+.bbar-adjacent{padding:10px 12px;width:96vw}.bbar-adjacent .row{gap:4px}
+.bbar-adjacent .row input{width:100%!important;font-size:13px!important;padding:6px 8px!important}
+.bbar-adjacent .chip{font-size:10px!important;padding:3px 7px!important}
+#advBtn{display:none!important}
 .modal-c{width:92vw!important;max-height:90vh;padding:14px}
 }
 </style>
