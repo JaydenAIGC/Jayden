@@ -68,27 +68,25 @@ class Backend:
         return {"config":{k:self.config[k] for k in ["llm_api_key","llm_base_url","text_model","image_api_key","image_base_url","image_model","custom_suffix","keep_human"]}}
     def gen_subject_ideas(self):
         try:
-            prompt="""你作为宏大概念主体设计师。输出1个独特的巨型核心主体，20-40字。
-格式：地貌环境 + 巨型结构体。
+            import random as _idea_r
+            _type=_idea_r.choice(["塔/尖塔/方尖碑","穹顶/半球体","拱桥/弧形拱","平台/悬浮台地","方碑/巨型立方体","巨门/门框结构","巨像/雕像","环形/圆环","棱柱/多面体","斜墙/倾斜平面"])
+            _land=_idea_r.choice(["冰原","沙漠","云海","荒原","海岸悬崖","火山口","深海裂谷","城市废墟","地下空洞","盐碱地","冻土苔原","干涸河床"])
+            prompt=f"""你作为宏大概念主体设计师。输出1个独特的巨型核心主体，20-40字。
+格式：{_land} + {_type}结构体。
 
 **形体底层逻辑：**
-- 大几何优先：球体、穹顶、圆环、棱柱、斜面方台、直管、弧形拱、平板
-- 单一整块巨型结构体，不是零散小建筑拼接
-- 偏爱嵌套关系：大环包裹内核、外框架包围主穹顶、「外壳+内芯」双层结构
-- 层次来自空间凹凸（高低落差、悬挑、中空镂空、巨大坡道），不是表面装饰
-
-**姿态与材质：**
-- 可倒置、倾斜悬浮、横向横亘、半嵌入地貌
+- 大几何优先，单一整块结构体，非零散拼接
+- 层次来自空间凹凸（高低落差、悬挑、中空镂空），不是表面装饰
 - 仅1种主材：磨砂金属/哑光混凝土/致密平滑岩体/半通透柔光晶体
 - 轮廓简洁干净，无锯齿状繁杂外缘
 
-**避坑（不要）：** 机械零件齿轮、废墟残骸、繁复雕花东方建筑、有机扭曲触手造型
+**避坑：** 机械零件齿轮、废墟残骸、繁复雕花、有机扭曲造型
 
 只输出一行，不要编号不要引号。"""
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
                "messages":[{"role":"user","content":prompt}],
-               "max_tokens":400,"temperature":0.6}
+               "max_tokens":300,"temperature":0.9}
             r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=30)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
