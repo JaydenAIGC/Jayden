@@ -583,6 +583,8 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 /* 卡片式图库 */
 .g-batch-card{display:flex;gap:8px;background:var(--card);border-radius:6px;border:1px solid var(--border);overflow:hidden;margin-bottom:6px;break-inside:avoid}
 .g-batch-card:hover{border-color:var(--accent)}
+.g-batch-card.folded .g-batch-desc{display:none}
+.g-batch-card.folded img{opacity:.5}
 .g-batch-card img{width:120px;height:auto;max-height:90px;object-fit:contain;flex-shrink:0;cursor:zoom-in}
 .g-batch-info{flex:1;padding:6px 8px;display:flex;flex-direction:column;gap:3px;overflow:hidden}
 .g-batch-idx{font-size:9px;color:var(--hint);font-weight:600}
@@ -999,19 +1001,18 @@ async function loadGallery(order){
    const n=b.subject||"未命名批次";
    // 批次卡片容器
    const bdiv=document.createElement("div");bdiv.className="g-batch";
-   bdiv.innerHTML=`<div class="g-batch-hd" onclick="this.nextElementSibling.classList.toggle('show')">
+   bdiv.innerHTML=`<div class="g-batch-hd">
     <span class="g-batch-subj">${b.poem||n}</span>
     <span class="g-batch-meta">${b.style||''} · ${imgs.length}/${ds.length}图</span>
-    <span class="g-batch-expand">▶</span>
    </div>
    ${b.poem?`<div class="g-batch-poem">${b.poem}</div>`:''}
-   <div class="g-batch-body${imgs.length>0?' show':''}">
+   <div class="g-batch-body show">
     <div style="width:100%;display:flex;gap:6px;margin-bottom:8px">
      <button class="btng btng-d" style="font-size:9px;padding:3px 10px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写':'📝 故事'}</button>
     </div>
     ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':
-     imgs.map((img,i)=>`<div class="g-batch-card">
-       <img src="/api/image/history/${img.file}" data-idx="${i}" data-batch="${b.id}" onclick="const _items=${JSON.stringify(imgs.map((m,j)=>({url:'/api/image/history/'+m.file,desc:(m.prompt||ds[j]||'')})))};ZOOM_LIST=_items;ZOOM_IDX=${i};document.getElementById('zoomImg').src=this.src;document.getElementById('zoomDesc').textContent=_items[${i}].desc;document.getElementById('zoomLayer').classList.add('show')" />
+     imgs.map((img,i)=>`<div class="g-batch-card" onclick="this.classList.toggle('folded')">
+       <img src="/api/image/history/${img.file}" onclick="event.stopPropagation();const _items=${JSON.stringify(imgs.map((m,j)=>({url:'/api/image/history/'+m.file,desc:(m.prompt||ds[j]||'')})))};ZOOM_LIST=_items;ZOOM_IDX=${i};document.getElementById('zoomImg').src=this.src;document.getElementById('zoomDesc').textContent=_items[${i}].desc;document.getElementById('zoomLayer').classList.add('show')" />
        <div class="g-batch-info">
         <div class="g-batch-idx">#${i+1}</div>
         <div class="g-batch-desc">${(img.prompt||ds[i]||'').slice(0,80)}${((img.prompt||ds[i]||'').length>80?'...':'')}</div>
