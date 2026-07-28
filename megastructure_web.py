@@ -473,6 +473,7 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .zoom-layer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;cursor:zoom-out;align-items:center;justify-content:center}
 .zoom-layer.show{display:flex}
 .zoom-layer img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:fadeIn .2s}
+@media(max-width:768px){.zoom-layer img{max-width:96vw;max-height:80vh}.bbar{z-index:52!important}}
 @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 .card .prev .ph{color:var(--hint);font-size:10px}
 .card-tags{display:flex;gap:6px;font-size:9px;color:var(--hint);padding:2px 0 0}
@@ -506,11 +507,29 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .mg{margin-bottom:6px}
 .mg label{display:block;font-size:11px;color:var(--hint);margin-bottom:2px}
 .mg input,.mg select{width:100%;background:var(--input);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:11px;color:var(--text);outline:none}
+@media(max-width:768px){.mg input,.mg select{font-size:14px;padding:8px 10px}}
 .loading{display:inline-block;width:10px;height:10px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:2px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+/* 手机端适配 */
+@media(max-width:768px){
+body{font-size:13px;overflow:auto}
+.header{padding:8px 10px;gap:6px;flex-wrap:wrap}.header h1{font-size:14px;width:100%;text-align:center;margin-bottom:2px}
+.header select{font-size:11px;padding:4px 6px;flex:1;min-width:0}
+.header .tab{font-size:11px;padding:4px 8px}
+.header .btng{font-size:9px!important;padding:2px 5px!important}
+.header label{font-size:10px!important}
+.grid{grid-template-columns:1fr!important;gap:8px}
+.card{padding:8px}.card .desc{font-size:12px}.card .acts{gap:3px}
+.card .btng{font-size:10px!important;padding:3px 8px!important}
+.gwrap{padding:8px 8px 120px}.gallery{padding:8px}.gallery .g-item{flex-direction:column}.gallery .g-item img{width:100%;height:160px}
+.bar{flex-wrap:wrap;gap:4px;padding:6px 8px;justify-content:center}
+.bar .btng{font-size:10px!important;padding:3px 8px!important}
+.bbar{bottom:8px}.bbar .btng{font-size:10px!important;padding:4px 10px!important}
+.modal-c{width:92vw!important;max-height:90vh;padding:14px}
+}
 </style>
 </head>
 <body>
