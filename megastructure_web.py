@@ -313,56 +313,48 @@ class Backend:
             h=self._headers("llm")
             txt="\n".join([f"{i+1}. {d}" for i,d in enumerate(descs)])
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
-               "messages":[{"role":"user","content":f"""你是一名场景全面优化师。对以下{len(descs)}条描述词进行**全面优化**，输出JSON数组：
+               "messages":[{"role":"user","content":f"""你作为提示词智能优化引擎。读取以下{len(descs)}条原始正向提示词，识别并修复缺陷。
 
+**核心红线（绝对遵守）：**
+- **不新增任何原始文本不存在的物体、生物、建筑、景观**
+- **不修改原有主体、人物数量、人物有无、场景基调**
+
+**优化逻辑：**
+1. 统一语序结构：镜头语言 → 美术画风 → 核心主体 → 环境空间与留白控制 → 人物设定 → 光影色彩规则 → 材质与画质
+2. 自动补充必要约束词，强化大面积留白、控制元素密度，维持画面干净通透
+3. 消除冲突参数，禁止同时出现广角/长焦、深景深/浅景深、多种光源
+4. 规范光影，锁定单一主光源，抑制杂光斑、彩色乱光
+5. 精简冗余重复词汇，拒绝无意义堆砌
+6. 根据场景自动适配材质关键词，优先低纹理密度，规避破损、锈蚀、斑驳质感
+
+**输出格式：**
 [
-  {{"description":"优化后的场景描述","人物":"人物位置和动作描述","构图":"构图建议","视角":"建议的视角方向"}},
+  {{"prompt":"优化后的完整正向提示词","negative":"针对性补充的负面提示词"}},
   ...
 ]
 
-当前风格：「{style}」
-
-**描述优化（必须做）：**
-- 根据主体特性做差异化润色——石头强化岩石质感，金属强化冰冷锈蚀，木材强化腐朽纹理
-- 用更具画面感的语言替换平淡表达，后半段收尾方式各不相同
-- 强化空间层次、材质质感、光线方向与色温、景深
-- 全程用中文描述
-
-**人物优化（必须做）：**
-- 为每条设计一个极小的人物（位置+姿态），仅作尺度参照
-- 位置：画面底部/门洞下方/台阶尽头/平台边缘/石柱旁
-- 姿态：静立/仰望/缓步/背对/驻足/撑伞/拄杖
-
-**构图优化（必须做）：**
-- 每条根据其视角和场景特点，推荐**最合适的构图方式**，不要套固定对应关系
-- 每条构图不能相同，要有差异化
-- 选项参考：三分法/引导线/框架构图/对称/黄金分割/纵深透视/低角度等，灵活选择
-
-【现有描述词】
+【原始提示词】
 {txt}
 
 只输出JSON数组，不要多余文字"""}],
-               "max_tokens":4096,"temperature":0.5}
+               "max_tokens":4096,"temperature":0.3}
             r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=60)
             r.raise_for_status()
             raw=r.json()["choices"][0]["message"]["content"]
             import re
-            # 尝试解析JSON
-            optimized=[];humans=[];compositions=[]
             m=re.search(r'\[.*?\]',raw,re.DOTALL)
+            optimized=[];negatives=[]
             if m:
                 try:
                     data=json.loads(m.group())
                     for item in data:
-                        optimized.append(item.get("description",""))
-                        humans.append(item.get("人物",""))
-                        compositions.append(item.get("构图",""))
+                        optimized.append(item.get("prompt",""))
+                        negatives.append(item.get("negative",""))
                 except: pass
             if not optimized:
-                lines=[l.strip().lstrip("0123456789.、）) ") for l in raw.split("\n") if l.strip() and len(l.strip())>20]
+                lines=[l.strip() for l in raw.split("\n") if l.strip() and len(l)>20]
                 optimized=lines[:len(descs)]
-            prompts=[self.build_prompt(d,False,False,self.config.get("keep_human",True),"1024x1792") for d in optimized[:len(descs)]]
-            return {"ok":True,"optimized":optimized[:len(descs)],"prompts":prompts,"humans":humans,"compositions":compositions}
+            return {"ok":True,"optimized":optimized[:len(descs)],"negatives":negatives}
         except Exception as e: return {"ok":False,"error":f"优化异常: {str(e)[:80]}"}
     def build_prompt(self,desc,comp=False,light=False,human=True,size="1024x1792"):
         bp=self.STYLE.get("base_positive",""); art=self.STYLE.get("art_style","")
@@ -967,23 +959,20 @@ async function redoAll(){
 async function optimizeAll(){
  const btn=document.querySelector("#batchBar .btng-d:nth-child(3)");
  if(btn){btn.disabled=true;btn.innerHTML='<span class="loading"></span>'}
- st("LLM优化中...","var(--accent)");
- const descs=CARDS.map(c=>c.desc);
+ st("智能优化Prompt中...","var(--accent)");
+ const descs=CARDS.map(c=>c.prompt||c.desc);
  const r=await api("/api/optimize",{descriptions:descs,style:document.getElementById("styleSelect").value});
  if(btn){btn.disabled=false;btn.innerHTML="✨AI优化"}
  if(!r.ok||!r.optimized){st("优化失败: "+(r.error||"未知"),"var(--warn)");return}
  for(let i=0;i<r.optimized.length&&i<CARDS.length;i++){
   const full=r.optimized[i];
+  const neg=r.negatives?.[i]||"";
   const short=full.length>80?full.slice(0,77)+'...':full;
   CARDS[i].desc=short;CARDS[i].prompt=full;
   document.getElementById("desc"+i).textContent=short;
-  // 显示人物和构图信息
   const tags=document.getElementById("tags"+i);
-  if(tags){
-   let extra="";
-   if(r.humans?.[i]) extra+=` 🧑${r.humans[i].slice(0,15)}`;
-   if(r.compositions?.[i]) extra+=` 📐${r.compositions[i].slice(0,10)}`;
-   if(extra) tags.innerHTML+=extra;
+  if(tags&&neg){
+   tags.innerHTML+=` ⛔${neg.slice(0,20)}...`;
   }
  }
  st("优化完成 "+r.optimized.length+" 条","var(--accent2)");
