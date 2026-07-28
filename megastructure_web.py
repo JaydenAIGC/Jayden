@@ -684,8 +684,6 @@ body{font-size:13px;overflow:auto}
 <body>
 <div class="header">
  <h1>街灯AI--场景生成器</h1>
- <label style="font-size:11px;color:var(--hint);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" id="autoRotate" checked />轮换</label>
- <label style="font-size:11px;color:var(--hint);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" id="autoSwitch" />自动</label>
  <div style="flex:1"></div>
  <button class="tab act" onclick="showTab('gen')" id="tabGen">✨ 生成</button>
  <button class="tab" onclick="showTab('lib')" id="tabLib">📂 图库 <span id="galleryCount" style="font-size:9px;color:var(--accent2)"></span></button>
@@ -800,13 +798,9 @@ async function genIdeas(){
  try{
  const subj=document.getElementById("subjInp").value.trim();
  const cnt=parseInt(document.getElementById("cntInp").value)||5;
- const rot=document.getElementById("autoRotate").checked;
- const sw=document.getElementById("autoSwitch").checked;
- const sfx=document.getElementById("sfxInp").value.trim();
- if(sfx!=CONFIG.custom_suffix){CONFIG.custom_suffix=sfx;await api("/api/save_config",CONFIG)}
  const btn=document.getElementById("genBtn");btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
  st("生成描述词...","var(--accent)");
- const r=await api("/api/gen_desc",{subject:subj,count:cnt,rotate:rot});
+ const r=await api("/api/gen_desc",{subject:subj,count:cnt});
  btn.disabled=false;btn.innerHTML="批量生成";
  if(!r.ok){st("失败: "+r.error,"var(--warn)");return}
  if(!r.descriptions||r.descriptions.length==0){st("无结果","var(--warn)");return}
