@@ -435,7 +435,10 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
 <button type="submit">进入</button>
 </form></div></body></html>""".encode())
     def do_GET(self):
-        if not self._check_auth():
+        if self.path.startswith("/api/"):
+            if not self._check_auth():
+                self._json({"ok":False,"error":"未授权"}); return
+        elif not self._check_auth():
             self._login_page(); return
         if self.path=="/":
             self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
@@ -461,7 +464,7 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
             params=urllib.parse.parse_qs(body)
             tk=params.get("token",[None])[0]
             if tk==AUTH_TOKEN:
-                self.send_response(302);self.send_header("Set-Cookie",f"token={AUTH_TOKEN}; Path=/; Max-Age=86400");self.send_header("Location","/");self.end_headers()
+                self.send_response(302);self.send_header("Set-Cookie",f"token={AUTH_TOKEN}; Path=/; Max-Age=86400; SameSite=Lax");self.send_header("Location","/");self.end_headers()
             else:
                 self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
                 self.wfile.write(f"""<!DOCTYPE html><html><body style="background:#0f0f13;color:#e8e8ed;display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui"><div style="text-align:center"><p style="color:#e17055;margin-bottom:16px">❌ 密码错误</p><a href="/" style="color:#6c5ce7">重新输入</a></div></body></html>""".encode())
