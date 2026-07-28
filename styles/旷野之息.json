@@ -1,0 +1,92 @@
+{
+  "style_name": "旷野之息",
+
+  "style_type": "旷野冒险概念美术",
+  "render_type": "吉卜力/塞尔达风格渲染，清新通透",
+
+  "style_keywords_short": "旷野,冒险,自然,遗迹,塞尔达风",
+  "core_mood": "清风吹拂的旷野，远古遗迹与自然共生，宁静中有探索欲",
+
+  "feature_switch": {
+    "auto_switch_style": false,
+    "auto_fix_subject": true
+  },
+
+  "scene_category": ["旷野遗迹", "自然奇观", "草原秘境"],
+
+  "art_style": "Ghibli-inspired landscape art, Zelda Breath of the Wild concept art, clean and clear art style, adventure game environment design, open world wilderness",
+
+  "base_positive": "开阔大全景，干净通透的画面，清新色调，蓝天白云，自然光线，远处天际线，草地与风，远古遗迹与自然地貌融合，清晰轮廓，简洁构图，不杂乱，色彩干净明亮，空气清新通透，远景层次分明，视觉放松不压抑",
+  "base_negative": "压抑阴暗，大量废墟碎片，脏乱破败，厚重乌云，饱和度过低，拥挤构图，过度细节，恐怖感，末世感，尸体，血腥，战争场景，室内狭窄空间",
+
+  "user_input_tpl": {
+    "hint_text": "输入旷野中的主体，如：草原上的远古石环、悬崖边的白色塔楼",
+    "splice_rule": "主体放在正向提示词前，英文逗号拼接",
+    "input_ban_list": ["室内","战争","血腥","恐怖"]
+  },
+
+  "dynamic_subject_generator": {
+    "enable": true,
+    "generate_prompt": "生成一个旷野场景中的建筑或自然奇观主体，16-25字。如：绿色草原上矗立一座白色巨石环。清新自然，不要压抑",
+    "max_length": 25,
+    "avoid_keyword": ["室内","战争","尸体","血腥","锁链","牢笼","枯骨"],
+    "refresh_button_support": true
+  },
+
+  "camera_settings": {
+    "lens_type": "标准视角，24-35mm",
+    "perspective": "平视或轻微俯视",
+    "shot_type": "全景、中全景",
+    "depth_of_field": "前后景皆清晰，空气通透",
+    "composition_rule": "三分法，建筑占画面1/3，留出大量天空和前景草地"
+  },
+
+  "light_atmosphere": {
+    "light_type": "自然日光，蓝天白云，暖色阳光",
+    "time_preference": "清晨、午后、黄昏金色时刻",
+    "atmosphere_effect": "清新通透，无雾霾，偶尔轻风吹草",
+    "forbidden_light": "阴森暗光、绿色鬼火、血红色天光"
+  },
+
+  "material_texture": {
+    "main_material": "风化石材、青苔覆盖、白色大理石",
+    "surface_feature": "简洁几何、清晰轮廓、自然风化但不破败",
+    "avoid_material": "锈蚀金属、腐烂木材、大量碎石"
+  },
+
+  "color_system": {
+    "base_tone": "明亮清新基底",
+    "main_color": "草绿、天空蓝、暖白、土黄",
+    "accent_color": "夕阳金、清澈蓝",
+    "color_rule": "干净高通透，低灰度，避免脏色浑浊"
+  },
+
+  "sampler_config": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 24,
+    "cfg_scale": 6.5,
+    "width": 1792,
+    "height": 1024,
+    "aspect_ratio": "16:9"
+  },
+
+  "post_process": {
+    "sharpness": 1.0,
+    "contrast": 1.02,
+    "vignette": false,
+    "saturation_limit": 1.1
+  },
+
+  "lora_recommend": "",
+  "vae": "auto",
+
+  "caption_group": {
+    "short_text": "旷野冒险 #清新画风 #AI绘画",
+    "medium_text": "清风吹过无垠草原，远古遗迹在阳光下静静伫立。",
+    "long_text": "旷野之上，风拂过草地，远古的石头建筑在蓝天下沉默矗立。没有压抑，只有探索的召唤。#旷野之息",
+    "hashtags": ["概念场景","清新画风","旷野冒险"]
+  },
+
+  "bgm_keywords": "peaceful acoustic, gentle wind, adventure theme orchestral light, Zelda ambient"
+}
