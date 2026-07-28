@@ -140,12 +140,7 @@ class Backend:
             # 用build_prompt生成full prompt作为后备，同时把初稿作为desc
             prompts=[self.build_prompt(lines[i] if i<len(lines) else subject,False,False,self.config.get("keep_human",True),"1024x1792") for i in range(count)]
             batch_id=self._new_batch(subject or f"场景",lines[:count])
-            # 自动生成故事文案
-            try:
-                poem_resp=self.gen_batch_poem(batch_id)
-                poem=poem_resp.get("text","") if poem_resp.get("ok") else ""
-            except: poem=""
-            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id,"poem":poem}
+            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id}
         except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:120]}"}
     def gen_one_desc(self):
         try:
@@ -161,7 +156,7 @@ class Backend:
 - 影视概念原画叙事感
 - 禁止短句"""}],
                "max_tokens":400,"temperature":0.9}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=30)
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=30)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
             import re
@@ -190,7 +185,7 @@ class Backend:
 - **严格控制在10-20字**
 - 只输出一句话，不要引号或解释"""}],
                "max_tokens":100,"temperature":0.8}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=30)
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=30)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"].strip().strip("\"'")
             return {"ok":True,"text":txt}
@@ -219,7 +214,7 @@ class Backend:
 - **严格控制在10-20字**
 - 只输出一句话，不要引号或解释"""}],
                "max_tokens":100,"temperature":0.8}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=30)
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=30)
             r.raise_for_status()
             poem=r.json()["choices"][0]["message"]["content"].strip().strip("\"'")
             # 保存到批次
@@ -264,7 +259,7 @@ class Backend:
 
 只输出JSON数组，不要多余文字"""}],
                "max_tokens":4096,"temperature":0.3}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=60)
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=60)
             r.raise_for_status()
             raw=r.json()["choices"][0]["message"]["content"]
             import re
