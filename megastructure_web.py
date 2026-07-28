@@ -658,7 +658,7 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 /* 手机端适配 */
 @media(max-width:768px){
 body{font-size:13px;overflow:auto}
-.header{padding:8px 10px;gap:6px;flex-wrap:wrap;justify-content:flex-start}.header h1{font-size:15px;width:100%;text-align:left;margin-bottom:2px}
+.header{padding:8px 10px;gap:6px;flex-wrap:wrap;justify-content:flex-start}.header h1{font-size:15px!important;text-align:left;margin-bottom:2px}
 .header .tab{font-size:11px;padding:4px 8px}
 .header .btng{font-size:9px!important;padding:2px 5px!important}
 .grid{grid-template-columns:1fr!important;gap:8px}
@@ -695,7 +695,7 @@ body{font-size:13px;overflow:auto}
 <body>
 <div class="header">
  <div style="display:flex;flex-direction:column;line-height:1.2;flex-shrink:0">
-  <h1 style="margin:0;font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">街灯AI</h1>
+  <h1 style="margin:0;font-size:150px;font-weight:700;line-height:1;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">街灯AI</h1>
   <span style="font-size:9px;color:var(--hint);font-weight:400;letter-spacing:1px">Created by Jayden</span>
  </div>
  <div style="flex:1"></div>
