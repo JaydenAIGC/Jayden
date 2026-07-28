@@ -379,13 +379,13 @@ class Backend:
         has_human_desc=any(w in desc for w in ["人影","剪影","人物","行人","身影","背影","骑手"])
         if has_human_desc or human:
             # 带人→史诗影视画风
-            style_tag="影视环境概念原画，UE5 Lumen全局光照，超写实PBR材质，宏大科幻巨构景观，结构清晰，低纹理密度，减少表面细碎纹理，柔和物理渲染"
+            style_tag="建筑概念设计，影视概念图，超写实Octane渲染，宏大景观艺术，史诗环境原画，低纹理密度，光滑干净材质，无破损锈蚀，无手绘笔触，柔和边缘无生硬勾边"
         else:
             # 不带人→梦核极简画风
-            style_tag="梦核建筑，阈限空间，科幻建筑概念设计，Octane渲染，低纹理密度，光滑干净材质，无破损锈蚀，宏大孤寂景观，无手绘笔触"
+            style_tag="建筑概念设计，梦幻核建筑，阈限空间，超写实Octane渲染，宏大孤寂景观，低纹理密度，光滑干净材质，无破损锈蚀，无手绘笔触，柔和边缘无生硬勾边"
         # ③ 核心主体 从 desc 来
         # ④ 环境
-        env="巨型主体悬浮于分层纯净云海之上，纯净渐变天空，无多余杂物，空旷大地"
+        env="巨型主体悬浮于分层纯净云海之上，纯净渐变天空，无多余杂物，空旷大地，哑光混凝土与光滑浅灰金属材质，磨砂穹顶，轻薄云层，无生锈无碎石无泥泞"
         # ⑤ 人物策略
         neg_human=""
         if has_human_desc:
@@ -405,7 +405,7 @@ class Backend:
         # 组装完整prompt
         p=f"{desc}, {art}, {bp}" if art else desc
         p+=f"，{lens}，{style_tag}，{env}，{light_color}，{quality}"
-        p+=f"，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground{neg_human}"
+        p+=f"，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground, no hand painted, no thick paint, no cel shading, no sketch lines, no rough metal, no muddy ground, no moss, no cracks, no rust, no wear and tear{neg_human}"
         # 标注画幅尺寸
         size_map={"1024x1024":"方形构图1:1","1792x1024":"横屏宽幅16:9","1024x1792":"竖屏9:16","1344x768":"宽屏"}
         sn=size_map.get(size,"")
