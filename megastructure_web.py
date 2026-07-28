@@ -657,15 +657,18 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 /* 手机端适配 */
 @media(max-width:768px){
 body{font-size:13px;overflow:auto}
-.header{padding:8px 10px;gap:6px;flex-wrap:wrap}.header h1{font-size:14px;width:100%;text-align:center;margin-bottom:2px}
-.header select{font-size:11px;padding:4px 6px;flex:1;min-width:0}
+.header{padding:8px 10px;gap:4px;flex-wrap:wrap;justify-content:center}.header h1{font-size:15px;width:100%;text-align:center;margin-bottom:4px}
 .header .tab{font-size:11px;padding:4px 8px}
 .header .btng{font-size:9px!important;padding:2px 5px!important}
-.header label{font-size:10px!important}
 .grid{grid-template-columns:1fr!important;gap:8px}
 .card{padding:8px}.card .desc{font-size:12px}.card .acts{gap:3px}
 .card .btng{font-size:10px!important;padding:3px 8px!important}
-.gwrap{padding:8px 8px 120px}.gallery{padding:8px}.gallery .g-item{flex-direction:column}.gallery .g-item img{width:100%;height:160px}
+.gwrap{padding:8px 8px 120px}.gallery{padding:8px}
+.g-batch{margin:0 0 10px}.g-batch-hd{padding:8px 10px}.g-batch-body{padding:6px 8px 10px}
+.g-batch-body.show{column-count:1!important}.g-batch-subj{font-size:13px}
+.g-batch-card img{width:80px;height:60px}.g-batch-info{padding:4px 6px}
+.g-batch-desc{font-size:10px;-webkit-line-clamp:2}.g-batch-meta{font-size:9px}
+.g-batch-poem{font-size:11px;padding:6px 10px}
 .bar{flex-wrap:wrap;gap:4px;padding:6px 8px;justify-content:center}
 .bar .btng{font-size:10px!important;padding:3px 8px!important}
 .bbar{bottom:8px}.bbar .btng{font-size:10px!important;padding:4px 10px!important}
@@ -678,6 +681,10 @@ body{font-size:13px;overflow:auto}
 .bbar-adjacent .chip{font-size:10px!important;padding:3px 7px!important}
 #advBtn{display:none!important}
 .modal-c{width:92vw!important;max-height:90vh;padding:14px}
+.g-toolbar{flex-wrap:wrap}.g-toolbar input{min-width:80px;font-size:12px}
+/* 缩放导航 */
+.zoom-nav{font-size:24px;padding:8px}
+.zoom-prev{left:2px}.zoom-next{right:2px}
 }
 </style>
 </head>
