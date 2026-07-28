@@ -695,8 +695,8 @@ body{font-size:13px;overflow:auto}
 <div class="header">
  <h1>街灯AI JAYDEN AI</h1>
  <div style="flex:1"></div>
- <button class="tab act" onclick="showTab('gen')" id="tabGen">✨ 生成</button>
- <button class="tab" onclick="showTab('lib')" id="tabLib">📂 图库 <span id="galleryCount" style="font-size:9px;color:var(--accent2)"></span></button>
+ <button class="tab act" onclick="showTab('gen')" id="tabGen">生成</button>
+ <button class="tab" onclick="showTab('lib')" id="tabLib">图库 <span id="galleryCount" style="font-size:9px;color:var(--accent2)"></span></button>
  <button class="btng btng-d" onclick="showSettings()" style="font-size:16px;padding:2px 10px;line-height:1.4">⚙</button>
 </div>
 
@@ -720,7 +720,7 @@ body{font-size:13px;overflow:auto}
    <option value="1024x1792" selected>9:16 竖</option>
    <option value="1344x768">宽屏</option>
   </select>
-  <button class="btng btng-p" onclick="genIdeas()" id="ideaBtn">💡灵感</button>
+  <button class="btng btng-p" onclick="genIdeas()" id="ideaBtn">生成灵感</button>
   <button class="btng btng-p" onclick="batchGen()" id="genBtn">批量生成</button>
   <button class="btng btng-d" onclick="toggleAdv()" id="advBtn">⚙高级</button>
  </div>
@@ -793,15 +793,15 @@ async function genIdeas(){
  const btn=document.getElementById("ideaBtn");btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
  try{
   const r=await api("/api/gen_ideas");
-  if(!r.ok){st("灵感失败: "+(r.error||"无返回"),"var(--warn)");btn.disabled=false;btn.innerHTML="💡灵感";return}
-  if(!r.ideas||!r.ideas.length){st("灵感失败: AI返回为空","var(--warn)");btn.disabled=false;btn.innerHTML="💡灵感";return}
+  if(!r.ok){st("灵感失败: "+(r.error||"无返回"),"var(--warn)");btn.disabled=false;btn.innerHTML="生成灵感";return}
+  if(!r.ideas||!r.ideas.length){st("灵感失败: AI返回为空","var(--warn)");btn.disabled=false;btn.innerHTML="生成灵感";return}
   document.getElementById("subjInp").value=r.ideas[Math.floor(Math.random()*r.ideas.length)];
   st("灵感已填入","var(--accent2)");
  }catch(e){
   console.error("genIdeas error:",e);
   st("请求出错: "+e.message,"var(--warn)")
  }
- btn.disabled=false;btn.innerHTML="💡灵感";
+ btn.disabled=false;btn.innerHTML="生成灵感";
 }
 
  async function batchGen(){
