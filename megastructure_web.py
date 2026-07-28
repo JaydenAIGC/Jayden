@@ -825,35 +825,41 @@ async function genIdeas(){
  const subj=document.getElementById("subjInp").value.trim();
  const cnt=parseInt(document.getElementById("cntInp").value)||5;
  const btn=document.getElementById("genBtn");btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
+ const grid=document.getElementById("cardGrid");
+ grid.innerHTML="";CARDS=[];
  st("生成描述词...","var(--accent)");
- // 逐个生成
- let allDescs=[],allPrompts=[],batchId="";
+ // 逐个生成，出一个显示一个
+ let batchId="";
  for(let i=0;i<cnt;i++){
   st(`生成中 ${i+1}/${cnt}...`,"var(--accent)");
   let r=await api("/api/gen_desc",{subject:subj,count:1});
-  // 失败则重试一次
   if(!(r.ok&&r.descriptions&&r.descriptions.length>0)){
    r=await api("/api/gen_desc",{subject:subj,count:1});
   }
-  if(r.ok&&r.descriptions&&r.descriptions.length>0){
-   allDescs.push(r.descriptions[0]);
-   allPrompts.push(r.prompts?.[0]||r.descriptions[0]);
-   if(!batchId&&r.batch_id)batchId=r.batch_id;
-  }else{
-   allDescs.push(subj);
-   allPrompts.push(subj);
-  }
- }
- btn.disabled=false;btn.innerHTML="批量生成";
- if(allDescs.length==0){st("无结果","var(--warn)");return}
- const grid=document.getElementById("cardGrid");
- grid.innerHTML="";CARDS=[];
- allDescs.forEach((d,i)=>{
-  const fp=allPrompts[i]||d;
-  CARDS.push({desc:d,img:null,prompt:fp,batchId:batchId||"",descIdx:i,optimized:false});
-  const c=document.createElement("div");c.className="card";
+  const desc=(r.ok&&r.descriptions&&r.descriptions.length>0)?r.descriptions[0]:subj;
+  const fp=r.prompts?.[0]||desc;
+  if(!batchId&&r.batch_id)batchId=r.batch_id;
+  // 立即显示这张卡
+  CARDS.push({desc,img:null,prompt:fp,batchId:batchId||"",descIdx:i,optimized:false});
+  const c=document.createElement("div");c.className="card";c.id="card_"+i;
   c.innerHTML=`<div class="idx">#${i+1}
    <span style="float:right;font-size:10px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">▼</span></div>
+   <div class="desc" id="desc${i}" ondblclick="editDesc(${i})">${desc}</div>
+   <div class="acts">
+    <button class="btng btng-p" style="font-size:12px;padding:5px 12px" onclick="genImg(${i})">开始生图</button>
+    <button class="btng btng-s" style="font-size:12px;padding:5px 12px" onclick="redoDesc(${i})">重新描述</button>
+    <button class="btng btng-d hidden" style="font-size:9px;padding:2px 6px" id="save${i}" onclick="saveImg(${i})">保存</button>
+   </div>
+   <div class="prev" id="prev${i}"><span class="ph">等待生图...</span></div>
+   <div class="card-tags" id="tags${i}">
+    <span id="optTag${i}" style="display:none;color:var(--accent2);font-size:9px">✦ 已优化</span>
+    <span>📐${document.getElementById('sizeSelect')?.value||'9:16'}</span>
+   </div>
+  `;
+  grid.appendChild(c);
+ }
+ btn.disabled=false;btn.innerHTML="批量生成";
+ const bar=document.getElementById("batchBar");bar.classList.remove("hidden");
    <div class="desc" id="desc${i}" ondblclick="editDesc(${i})">${d}</div>
    <div class="acts">
     <button class="btng btng-p" style="font-size:12px;padding:5px 12px" onclick="genImg(${i})">开始生图</button>
