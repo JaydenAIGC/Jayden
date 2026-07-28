@@ -130,8 +130,8 @@ class Backend:
         try:
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
-               "messages":[{"role":"user","content":ins}],"max_tokens":1024,"temperature":0.6}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=25)
+               "messages":[{"role":"user","content":ins}],"max_tokens":2048,"temperature":0.6}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=45)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
             lines=[l.strip().lstrip("0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>30]
