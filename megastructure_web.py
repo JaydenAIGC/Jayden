@@ -36,8 +36,15 @@ class Backend:
         if os.path.exists(fp):
             with open(fp,"r",encoding="utf-8") as f: c=json.load(f)
             for k in d: c.setdefault(k,d[k])
-            return c
-        return d
+        else:
+            c=dict(d)
+        # 环境变量覆盖（Railway Variables 优先）
+        env_map={"LLM_API_KEY":"llm_api_key","LLM_BASE_URL":"llm_base_url","TEXT_MODEL":"text_model",
+                 "IMAGE_API_KEY":"image_api_key","IMAGE_BASE_URL":"image_base_url","IMAGE_MODEL":"image_model"}
+        for envk,ck in env_map.items():
+            v=os.environ.get(envk)
+            if v: c[ck]=v
+        return c
     def _load_styles(self):
         st={}
         dp=STYLE_DIR
@@ -913,7 +920,7 @@ if __name__=="__main__":
     import webbrowser
     port=int(os.environ.get("PORT",8859))
     bind=os.environ.get("BIND","0.0.0.0")
-    server=http.server.HTTPServer((bind,port),Handler)
+    server=http.server.ThreadingHTTPServer((bind,port),Handler)
     print(f"[OK] 街灯AI--场景生成器 启动 http://{bind}:{port}")
     print(f"     http://127.0.0.1:{port}")
     webbrowser.open(f"http://127.0.0.1:{port}")
