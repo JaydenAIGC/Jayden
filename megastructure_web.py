@@ -424,7 +424,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return False
     def _login_page(self):
         self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
-        self.wfile.write(f"""<!DOCTYPE html><html><head><meta charset="utf-8"><title>街灯AI--场景生成器</title>
+        self.wfile.write(f"""<!DOCTYPE html><html><head><meta charset="utf-8"><title>街灯AI JAYDEN AI</title>
 <style>
 body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}}
 .box{{background:#18181c;border:1px solid #333;border-radius:12px;padding:40px;width:340px;text-align:center}}
@@ -534,7 +534,7 @@ HTML=r"""<!DOCTYPE html>
 <html lang="zh">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>街灯AI--场景生成器</title>
+<title>街灯AI JAYDEN AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#0f0f13;color:#e8e8ed;height:100vh;display:flex;flex-direction:column;font-size:14px;position:relative;overflow:hidden}
@@ -683,7 +683,7 @@ body{font-size:13px;overflow:auto}
 </head>
 <body>
 <div class="header">
- <h1>街灯AI--场景生成器</h1>
+ <h1>街灯AI JAYDEN AI</h1>
  <div style="flex:1"></div>
  <button class="tab act" onclick="showTab('gen')" id="tabGen">✨ 生成</button>
  <button class="tab" onclick="showTab('lib')" id="tabLib">📂 图库 <span id="galleryCount" style="font-size:9px;color:var(--accent2)"></span></button>
