@@ -726,7 +726,11 @@ body{font-size:13px;overflow:auto}
 </div>
 
 <div id="setMod" class="modal"><div class="modal-c" id="setContent"></div></div>
-<div class="zoom-layer" id="zoomLayer" onclick="closeZoom()"><img id="zoomImg" src="" alt="放大预览"/></div>
+<div class="zoom-layer" id="zoomLayer" onclick="closeZoom()">
+ <span style="position:absolute;top:12px;right:16px;font-size:22px;color:#fff;cursor:pointer;z-index:10;opacity:.7;text-shadow:0 1px 3px rgba(0,0,0,.5)">&times;</span>
+ <img id="zoomImg" src="" alt="放大预览"/>
+ <div id="zoomDesc" style="position:absolute;bottom:0;left:0;right:0;padding:14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#e8e8ed;font-size:13px;line-height:1.7;text-align:center;max-height:35%;overflow-y:auto;pointer-events:none"></div>
+</div>
 
 <script>
 let CARDS=[],CONFIG={},COMP=false,LIGHT=false,HUMAN=true;
@@ -908,7 +912,7 @@ function zoomImg(i){
  document.getElementById("zoomImg").src=`data:image/png;base64,${b64}`;
  document.getElementById("zoomLayer").classList.add("show");
 }
-function closeZoom(){document.getElementById("zoomLayer").classList.remove("show")}
+function closeZoom(){document.getElementById("zoomLayer").classList.remove("show");document.getElementById("zoomDesc").textContent=""}
 function reuseGallery(name){
  document.getElementById("subjInp").value=name.replace(/\.\w+$/,"");
  showTab("gen");
@@ -974,7 +978,7 @@ async function loadGallery(order){
     </div>
     ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':
      imgs.map((img,i)=>`<div class="g-batch-card">
-       <img src="/api/image/history/${img.file}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomLayer').classList.add('show')" />
+       <img src="/api/image/history/${img.file}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomDesc').textContent='${(img.prompt||ds[i]||'').replace(/'/g,"\\'")}';document.getElementById('zoomLayer').classList.add('show')" />
        <div class="g-batch-info">
         <div class="g-batch-idx">#${i+1}</div>
         <div class="g-batch-desc">${(img.prompt||ds[i]||'').slice(0,80)}${((img.prompt||ds[i]||'').length>80?'...':'')}</div>
