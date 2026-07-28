@@ -549,7 +549,7 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 :root{--bg:#0f0f13;--card:#18181c;--surf:#22222a;--input:#2a2a32;--border:#33333d;--accent:#6c5ce7;--accent2:#00cec9;--warn:#e17055;--text:#e8e8ed;--body:#b0b0b8;--hint:#6a6a74}
 .header{display:flex;align-items:center;padding:10px 20px;gap:12px;background:linear-gradient(135deg,#141420 0%,#1a1a30 50%,#141420 100%);border-bottom:1px solid rgba(51,51,61,.5);flex-shrink:0;position:relative;z-index:1}
 .header::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(108,92,231,.04) 50%,transparent 100%);pointer-events:none}
-.header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0}
 .header select{background:var(--surf);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:13px;outline:none;cursor:pointer}
 .header .tab{background:none;border:none;color:var(--hint);font-size:13px;cursor:pointer;padding:5px 12px;border-radius:4px;font-weight:600}
 .header .tab:hover{color:var(--text);background:var(--surf)}
@@ -657,12 +657,15 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 /* 手机端适配 */
 @media(max-width:768px){
 body{font-size:13px;overflow:auto}
-.header{padding:8px 10px;gap:4px;flex-wrap:wrap;justify-content:center}.header h1{font-size:15px;width:100%;text-align:center;margin-bottom:4px}
+.header{padding:8px 10px;gap:6px;flex-wrap:wrap;justify-content:flex-start}.header h1{font-size:15px;width:100%;text-align:left;margin-bottom:2px}
 .header .tab{font-size:11px;padding:4px 8px}
 .header .btng{font-size:9px!important;padding:2px 5px!important}
 .grid{grid-template-columns:1fr!important;gap:8px}
 .card{padding:8px}.card .desc{font-size:12px}.card .acts{gap:3px}
 .card .btng{font-size:10px!important;padding:3px 8px!important}
+/* 底部主按钮：灵感 & 批量生成 手机放大 */
+.bbar .btng{font-size:11px!important;padding:6px 14px!important}
+.bbar .btng-p,.bbar .btng-d{min-width:72px}
 .gwrap{padding:8px 8px 120px}.gallery{padding:8px}
 .g-batch{margin:0 0 10px}.g-batch-hd{padding:8px 10px}.g-batch-body{padding:6px 8px 10px}
 .g-batch-body.show{column-count:1!important}.g-batch-subj{font-size:13px}
@@ -671,7 +674,7 @@ body{font-size:13px;overflow:auto}
 .g-batch-poem{font-size:11px;padding:6px 10px}
 .bar{flex-wrap:wrap;gap:4px;padding:6px 8px;justify-content:center}
 .bar .btng{font-size:10px!important;padding:3px 8px!important}
-.bbar{bottom:8px}.bbar .btng{font-size:10px!important;padding:4px 10px!important}
+.bbar{bottom:8px}
 .bbar-main{flex-wrap:wrap;gap:5px;padding:8px 10px;width:96vw;justify-content:center}
 .bbar-main input{width:100%!important;font-size:14px!important;padding:8px 10px!important}
 .bbar-main .cnt{width:50px!important;min-width:50px!important}
@@ -717,7 +720,7 @@ body{font-size:13px;overflow:auto}
    <option value="1024x1792" selected>9:16 竖</option>
    <option value="1344x768">宽屏</option>
   </select>
-  <button class="btng btng-d" onclick="genIdeas()" id="ideaBtn">💡灵感</button>
+  <button class="btng btng-p" onclick="genIdeas()" id="ideaBtn">💡灵感</button>
   <button class="btng btng-p" onclick="batchGen()" id="genBtn">批量生成</button>
   <button class="btng btng-d" onclick="toggleAdv()" id="advBtn">⚙高级</button>
  </div>
