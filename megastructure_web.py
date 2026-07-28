@@ -60,17 +60,6 @@ class Backend:
     def _save_batch(self,b):
         bd=self._batch_dir()
         with open(os.path.join(bd,f"{b['id']}.json"),"w",encoding="utf-8") as f: json.dump(b,f,ensure_ascii=False,indent=2)
-    def _load_styles(self):
-        st={}
-        dp=STYLE_DIR
-        if os.path.isdir(dp):
-            for fn in sorted(glob.glob(os.path.join(dp,"*.json"))):
-                try:
-                    with open(fn,"r",encoding="utf-8") as f: d=json.load(f)
-                    n=d.get("style_name",""); 
-                    if n: d.setdefault("art_style","");d.setdefault("base_positive","");d.setdefault("dynamic_subject_generate_prompt","");st[n]=d
-                except: pass
-        return st
     def save_config(self,c):
         self.config.update(c);
         with open(os.path.join(BASE_DIR,"config.json"),"w",encoding="utf-8") as f: json.dump(self.config,f,ensure_ascii=False,indent=2)
@@ -732,7 +721,7 @@ body{font-size:13px;overflow:auto}
 <div class="zoom-layer" id="zoomLayer" onclick="closeZoom()"><img id="zoomImg" src="" alt="放大预览"/></div>
 
 <script>
-let CARDS=[],STYLES=[],CONFIG={},COMP=false,LIGHT=false,HUMAN=true;
+let CARDS=[],CONFIG={},COMP=false,LIGHT=false,HUMAN=true;
 async function api(path,data){
  console.log("api call:",path,data);
  const r=await fetch(path,{method:data?"POST":"GET",headers:{"Content-Type":"application/json"},body:data?JSON.stringify(data):null});
