@@ -131,8 +131,8 @@ class Backend:
         try:
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
-               "messages":[{"role":"user","content":ins}],"max_tokens":8192,"temperature":0.6}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=60)
+               "messages":[{"role":"user","content":ins}],"max_tokens":1024,"temperature":0.6}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=25)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
             lines=[l.strip().lstrip("0123456789.、）) ") for l in txt.split("\n") if l.strip() and len(l.strip())>30]
@@ -258,8 +258,8 @@ class Backend:
 {txt}
 
 只输出JSON数组，不要多余文字"""}],
-               "max_tokens":4096,"temperature":0.3}
-            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=60)
+               "max_tokens":1024,"temperature":0.3}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=25)
             r.raise_for_status()
             raw=r.json()["choices"][0]["message"]["content"]
             import re
