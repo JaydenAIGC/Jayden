@@ -137,7 +137,12 @@ class Backend:
             # 用build_prompt生成full prompt作为后备，同时把初稿作为desc
             prompts=[self.build_prompt(lines[i] if i<len(lines) else subject,False,False,self.config.get("keep_human",True),"1024x1792") for i in range(count)]
             batch_id=self._new_batch(subject or f"场景",lines[:count])
-            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id}
+            # 自动生成故事文案
+            try:
+                poem_resp=self.gen_batch_poem(batch_id)
+                poem=poem_resp.get("text","") if poem_resp.get("ok") else ""
+            except: poem=""
+            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id,"poem":poem}
         except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:120]}"}
     def gen_one_desc(self):
         try:
