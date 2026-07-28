@@ -607,6 +607,8 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 .zoom-layer{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;cursor:zoom-out;align-items:center;justify-content:center}
 .zoom-layer.show{display:flex}
 .zoom-layer img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:fadeIn .2s}
+.zoom-nav{position:absolute;top:50%;transform:translateY(-50%);font-size:32px;color:#fff;cursor:pointer;z-index:10;opacity:.4;padding:12px;text-shadow:0 1px 4px rgba(0,0,0,.5);transition:opacity .2s;user-select:none}
+.zoom-nav:hover{opacity:.9}.zoom-prev{left:8px}.zoom-next{right:8px}
 @media(max-width:768px){.zoom-layer img{max-width:96vw;max-height:80vh}.bbar{z-index:52!important}}
 @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 .card .prev .ph{color:var(--hint);font-size:10px}
@@ -726,9 +728,11 @@ body{font-size:13px;overflow:auto}
 </div>
 
 <div id="setMod" class="modal"><div class="modal-c" id="setContent"></div></div>
-<div class="zoom-layer" id="zoomLayer" onclick="closeZoom()">
- <span style="position:absolute;top:12px;right:16px;font-size:22px;color:#fff;cursor:pointer;z-index:10;opacity:.7;text-shadow:0 1px 3px rgba(0,0,0,.5)">&times;</span>
- <img id="zoomImg" src="" alt="放大预览"/>
+<div class="zoom-layer" id="zoomLayer" onclick="if(event.target===this)closeZoom()">
+ <span style="position:absolute;top:12px;right:16px;font-size:22px;color:#fff;cursor:pointer;z-index:10;opacity:.7;text-shadow:0 1px 3px rgba(0,0,0,.5);" onclick="closeZoom()">&times;</span>
+ <span class="zoom-nav zoom-prev" onclick="zoomNav(-1);event.stopPropagation()">&#10094;</span>
+ <span class="zoom-nav zoom-next" onclick="zoomNav(1);event.stopPropagation()">&#10095;</span>
+ <img id="zoomImg" src="" alt="放大预览" onclick="event.stopPropagation()"/>
  <div id="zoomDesc" style="position:absolute;bottom:0;left:0;right:0;padding:14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#e8e8ed;font-size:13px;line-height:1.7;text-align:center;max-height:35%;overflow-y:auto;pointer-events:none"></div>
 </div>
 
@@ -913,6 +917,21 @@ function zoomImg(i){
  document.getElementById("zoomLayer").classList.add("show");
 }
 function closeZoom(){document.getElementById("zoomLayer").classList.remove("show");document.getElementById("zoomDesc").textContent=""}
+// 图库左右翻页
+let ZOOM_LIST=[],ZOOM_IDX=0;
+function zoomNav(dir){
+ ZOOM_IDX=(ZOOM_IDX+dir+ZOOM_LIST.length)%ZOOM_LIST.length;
+ const item=ZOOM_LIST[ZOOM_IDX];
+ if(!item)return;
+ document.getElementById("zoomImg").src=item.url;
+ document.getElementById("zoomDesc").textContent=item.desc||"";
+}
+document.addEventListener("keydown",e=>{
+ if(!document.getElementById("zoomLayer").classList.contains("show"))return;
+ if(e.key=="ArrowLeft")zoomNav(-1);
+ else if(e.key=="ArrowRight")zoomNav(1);
+ else if(e.key=="Escape")closeZoom();
+});
 function reuseGallery(name){
  document.getElementById("subjInp").value=name.replace(/\.\w+$/,"");
  showTab("gen");
@@ -978,7 +997,7 @@ async function loadGallery(order){
     </div>
     ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':
      imgs.map((img,i)=>`<div class="g-batch-card">
-       <img src="/api/image/history/${img.file}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomDesc').textContent='${(img.prompt||ds[i]||'').replace(/'/g,"\\'")}';document.getElementById('zoomLayer').classList.add('show')" />
+       <img src="/api/image/history/${img.file}" data-idx="${i}" data-batch="${b.id}" onclick="const _items=${JSON.stringify(imgs.map((m,j)=>({url:'/api/image/history/'+m.file,desc:(m.prompt||ds[j]||'')})))};ZOOM_LIST=_items;ZOOM_IDX=${i};document.getElementById('zoomImg').src=this.src;document.getElementById('zoomDesc').textContent=_items[${i}].desc;document.getElementById('zoomLayer').classList.add('show')" />
        <div class="g-batch-info">
         <div class="g-batch-idx">#${i+1}</div>
         <div class="g-batch-desc">${(img.prompt||ds[i]||'').slice(0,80)}${((img.prompt||ds[i]||'').length>80?'...':'')}</div>
