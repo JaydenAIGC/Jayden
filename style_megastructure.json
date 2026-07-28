@@ -1,0 +1,44 @@
+{
+  "style_name": "巨构差异化-太古遗迹巨构风格",
+  "art_style": "cinematic environment concept art, 3A game scene design, realistic render, concept painting, Unreal引擎质感, Octane渲染, 太古遗迹巨构美学",
+  "style_type": "场景概念美术",
+  "render_type": "Unreal / Octane 写实渲染质感",
+  "base_positive": "倾斜超广角大全景，对角线构图，24mm广角镜头，轻微透视畸变，太古文明遗留巨型结构体，巨型石刻神像、远古祭坛、通天巨型石阶，建筑与峡谷山川断崖相融，画面底部存在渺小单人黑色人影剪影，极致尺度反差，不刻画人物面部，纵深透视，大气透视，斜向丁达尔光束，厚重层积云海，低空薄雾，空气尘埃，拂晓冷蓝暮色，局部金色轮廓光，岩层渗出幽微冷色灵光，巨型风化石材、远古浮雕基座，轻微岁月风化痕迹，零星微弱灵火光点，低饱和冷青蓝叠加暗赭石色调，冷暖微弱对比，苍茫太古孤寂肃穆氛围，电影级柔和布光，概念场景设计，写实渲染，细腻材质纹理，8K，超高细节，大景深",
+  "base_negative": "特写，近景，大量人群，彩色人物，清晰人脸，鲜艳高饱和色彩，大面积霓虹灯光，卡通，二次元，手绘，疯狂藤蔓吞噬墙体，彻底崩塌废墟，密集粗野主义砼质巨型都市，环世界未来城邦，小巧道具，封闭狭小室内，正面平光，无雾，杂乱构图，过度曝光，畸形建筑，大量飞行器、车辆，文字水印",
+  "mode": "sync",
+  "image_api_config": {
+    "enable_api_render": true,
+    "api_mode": "async",
+    "base_url": "http://127.0.0.1:7860/sdapi/v1/txt2img",
+    "submit_method": "POST",
+    "request_body_mapping": {
+      "prompt": "full_positive",
+      "negative_prompt": "base_negative",
+      "steps": 24,
+      "cfg_scale": 7,
+      "width": 1792,
+      "height": 1024,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras"
+    },
+    "sync_response": {
+      "image_data_field": "images",
+      "result_type": "base64"
+    },
+    "save_path": "./output_jugou_differ/",
+    "auto_save": true,
+    "file_naming_rule": "{timestamp}_{subject}.png"
+  },
+  "camera_settings": "24mm超广角，倾斜对角线构图，低角度仰摄，全景大全景，巨构占70%",
+  "light_atmosphere": "侧逆光轮廓光，斜向丁达尔光束，拂晓冷蓝暮色，厚重层积云海",
+  "material_texture": "巨型太古风化石材、远古石刻浮雕、巨型岩石基座",
+  "color_system": "冷灰深海青蓝中性基底，雾蓝冷灰暗赭石，局部淡金轮廓光",
+  "mood": "太古苍茫，遗迹巨构美学，远古文明的沉寂压迫感，个体渺小的静谧史诗感，神秘肃穆",
+  "captions": {
+    "short": "万古遗迹横亘云海，人类不过转瞬尘埃。#太古巨构 #概念艺术",
+    "medium": "上古文明遗留的巨型构造静静伫立云海之间。亿万岁月侵蚀石体，独行人影见证失落时代的沉默。#太古巨构 #史诗场景 #遗迹美学",
+    "long": "倾斜广角望向云海之上的太古巨型遗迹，斜向光束穿透层积云层。崖边黑色人影静静伫立，在远古造物面前，感受跨越万古的神秘与苍茫。#太古巨构 #巨物美学 #AI场景原画",
+    "hashtags": "太古巨构 巨构美学 AI场景原画 史诗环境 遗迹概念艺术"
+  },
+  "bgm_keywords": "epic ambient, mysterious ancient orchestral, dark atmosphere, cinematic ambient"
+}

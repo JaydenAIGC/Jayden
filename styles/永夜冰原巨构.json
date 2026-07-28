@@ -1,0 +1,176 @@
+{
+  "style_name": "永夜冰原巨构",
+  "art_style": "cinematic environment concept art, 3A game scene design, realistic render, concept painting, 影视级环境概念原画，3A游戏场景，写实渲染，Unreal引擎质感，Octane渲染，永夜冰原巨构美学",
+  "style_type": "场景概念美术",
+  "render_type": "Unreal / Octane 写实渲染质感",
+  "auto_switch_style": false,
+  "auto_fix_subject": true,
+  "random_composition": false,
+  "random_light": false,
+  "custom_positive_suffix": "",
+  "base_positive": "倾斜超广角大全景，对角线构图，24mm广角镜头，轻微透视畸变，冰雪覆盖巨型结构体，冰封远古城邦、冰川巨型祭坛、冻土巨型基座，广袤冰原峡谷地貌，纵深透视，大气透视，清冷弥散丁达尔，厚重寒雾、风雪气流，空气冰晶尘埃，永夜冷蓝暮光，去除大面积暖金色光线，微弱冰蓝色冷光轮廓，冻裂石材、覆冰合金表层，冰雪结晶纹理，零星幽蓝微光，极致低饱和冷色调，荒芜死寂氛围，电影级柔和布光，概念场景设计，写实渲染，细腻材质纹理，8K，超高细节，大景深",
+  "base_negative": "特写，近景，大量人群，彩色人物，清晰人脸，鲜艳暖色，大面积金色霞光，霓虹灯光，卡通，二次元，手绘，茂密绿植藤蔓，干旱荒漠，热带场景，小巧道具，封闭狭小室内，正面平光，杂乱构图，过度曝光，畸形建筑，大量飞行器、车辆，文字水印，人物尺寸过大，人物位于画面视觉中心，清晰五官，多个人物",
+  "user_input_tpl": {
+    "hint_text": "输入画面主体；留空则AI自动创作全新主体创意",
+    "splice_rule": "主体内容放在正向提示词最前方，英文逗号分隔拼接",
+    "input_limit": "禁止输入：二次元、绿植丛林、热带、大量人群、室内场景"
+  },
+  "dynamic_subject_generator": {
+    "enable": true,
+    "generate_prompt": "输出标准JSON结构，包含subject、target_style。题材限定：永夜冰原冰封巨型建筑、冰川上古祭坛、冻土外星巨构。输出一句简短场景描述，20–30字。建筑被冰雪覆盖，环境荒芜寒冷，禁止热带、丛林元素。严格禁止混搭题材，人物不可作为主体。格式示例：{\"subject\":\"xxx\",\"target_style\":\"永夜冰原巨构\"}，不要额外文字。",
+    "max_length": 30,
+    "avoid_keyword": [
+      "室内",
+      "大量人群",
+      "卡通",
+      "丛林",
+      "热带",
+      "绿植",
+      "题材混搭",
+      "古风机甲"
+    ],
+    "refresh_button_support": true
+  },
+  "feature_switch": {
+    "silhouette_figure": true,
+    "wide_21_9": false
+  },
+  "watermark_config": {
+    "enable_watermark": false,
+    "watermark_text": "",
+    "font_size": 32,
+    "opacity": 0.12,
+    "position": "bottom_right",
+    "color": "#ffffff",
+    "rotate": 0
+  },
+  "input_ban_list": [
+    "二次元",
+    "卡通",
+    "室内",
+    "大量人群",
+    "丛林",
+    "热带",
+    "绿植"
+  ],
+  "subject_rotate_mode": true,
+  "rotate_pool": [
+    "B站原版巨构AI",
+    "太古遗迹巨构",
+    "永夜冰原巨构",
+    "深海深渊巨构",
+    "东方神域巨构",
+    "古典西式巨构"
+  ],
+  "auto_ban_word": [],
+  "image_api_config": {
+    "enable_api_render": true,
+    "api_mode": "async",
+    "base_url": "http://127.0.0.1:7860/sdapi/v1/txt2img",
+    "auth_header": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {{API_KEY}}"
+    },
+    "api_key": "",
+    "submit_method": "POST",
+    "request_body_mapping": {
+      "prompt": "full_positive",
+      "negative_prompt": "base_negative",
+      "steps": "sampler_config.steps",
+      "cfg_scale": "sampler_config.cfg_scale",
+      "width": "sampler_config.width",
+      "height": "sampler_config.height",
+      "sampler_name": "sampler_config.sampler",
+      "scheduler": "sampler_config.scheduler"
+    },
+    "async_task": {
+      "enable": true,
+      "task_id_field": "task_id",
+      "status_query_url": "{{base_url}}/task/status",
+      "status_field": "status",
+      "success_state": [
+        "success",
+        "complete"
+      ],
+      "pending_state": [
+        "queue",
+        "processing",
+        "in_progress"
+      ],
+      "image_result_field": "images",
+      "result_type": "base64",
+      "poll_interval_ms": 1200,
+      "max_poll_times": 60,
+      "timeout_second": 120
+    },
+    "sync_response": {
+      "image_result_field": "images",
+      "result_type": "base64"
+    },
+    "save_path": "./output_jugou/ice/",
+    "auto_save": true,
+    "file_naming_rule": "{timestamp}_{subject}.png"
+  },
+  "camera_settings": {
+    "lens_type": "24mm超广角，轻微透视畸变，画面适度倾斜",
+    "perspective": "低角度仰摄，高空远景俯瞰，对岸远距离视角，对角线构图优先",
+    "shot_type": "全景、大全景，禁用特写、近景",
+    "depth_of_field": "远景巨构清晰，寒雾柔化中层",
+    "composition_rule": "巨型结构体占据画面上70%区域，单人剪影放置画面底部边缘，强化体量压迫感"
+  },
+  "light_atmosphere": {
+    "light_type": "侧逆光，冷色轮廓光，弥散冰蓝色丁达尔",
+    "time_preference": "永夜、极寒暮光、阴沉寒空",
+    "atmosphere_effect": "持续寒雾、冰晶气流、零星风雪",
+    "forbidden_light": "正面平光、大面积暖金色阳光、霞光"
+  },
+  "material_texture": {
+    "main_material": "覆冰巨型石材、冰封合金、冻裂巨型基座",
+    "surface_feature": "冰层、冰裂纹、薄积雪、少量裸露风化结构",
+    "avoid_material": "茂密植被、干燥荒漠地表、无冰建筑"
+  },
+  "color_system": {
+    "base_tone": "冷冰蓝、灰青基底",
+    "main_color": "冰蓝、冷灰、浅青白",
+    "accent_color": "微弱冰蓝色冷灵光，禁止大面积金色光源",
+    "color_rule": "全程冷色调，压低饱和度，杜绝暖色"
+  },
+  "core_mood": "极寒死寂，冰封巨构美学，万古冰川荒芜孤寂，冰冷压抑",
+  "style_keywords_short": "永夜冰原巨构,冰封巨筑,冷调,寒雾,倾斜超广角,写实史诗",
+  "sampler_config": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 24,
+    "cfg_scale": 7,
+    "width": 1792,
+    "height": 1024,
+    "aspect_ratio": "16:9"
+  },
+  "post_process": {
+    "sharpness": 1.15,
+    "contrast": 1.08,
+    "vignette": true,
+    "saturation_limit": 0.88
+  },
+  "lora_recommend": "",
+  "vae": "auto",
+  "auto_append_rule": "开启，自动追加倾斜广角、寒雾、冰封环境关键词",
+  "caption_group": {
+    "short_text": "冰川封存远古巨构，天地一片永夜寒寂。#冰原巨构 #概念艺术",
+    "medium_text": "巨型构造深埋冰雪之中，凛冽寒雾漫过冰封墙体。万古寒冬之下，一切文明归于沉寂。#冰原巨构 #史诗场景",
+    "long_text": "倾斜广角望向冰原深处冰封巨型遗迹，冰晶光束穿透茫茫寒雾。独行人影伫立雪原，感受冰川带来荒芜与压迫。#冰原巨构 #巨物美学 #AI场景原画",
+    "hashtags": [
+      "冰原巨构",
+      "巨构美学",
+      "冰封遗迹",
+      "AI场景原画",
+      "史诗环境"
+    ]
+  },
+  "audio_bgm": {
+    "style_tag": "冷寂史诗、极简氛围音乐、慢节奏、低频弦乐，无激烈鼓点",
+    "keyword_search": "cold ambient, frozen epic, lonely cinematic atmosphere",
+    "suggest_type": "规避温暖曲风、电子乐；优先冰冷绵长氛围配乐"
+  },
+  "config_note": "V2版本；永夜冰封巨构；全程冷色调剔除暖光；完整支持V2全部能力"
+}

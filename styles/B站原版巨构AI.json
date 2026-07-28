@@ -1,0 +1,176 @@
+{
+  "style_name": "B站原版巨构AI",
+  "art_style": "cinematic environment concept art, 3A game scene design, realistic render, concept painting, 影视级环境概念原画，3A游戏场景，写实渲染，Unreal引擎质感，Octane渲染，砼核美学",
+  "style_type": "场景概念美术",
+  "render_type": "Unreal / Octane 写实渲染质感",
+  "auto_switch_style": false,
+  "auto_fix_subject": true,
+  "random_composition": false,
+  "random_light": false,
+  "custom_positive_suffix": "",
+  "base_positive": "倾斜超广角大全景，对角线构图，24mm广角镜头，轻微透视畸变，宏大巨型人造巨构，粗野主义巨型城邦，环世界结构体，浮空巨型建筑，纵深透视，大气透视，狭长斜向丁达尔光束，厚重层积云海，低空薄雾，空气尘埃，拂晓冷蓝暮色，局部金色轮廓光，冷硬合金、巨型砼质立面，细密建筑纹理，零星微弱星点灯火，低饱和冷青蓝暗调，冷暖微弱对比，苍茫孤寂肃穆氛围，电影级柔和布光，概念场景设计，写实渲染，细腻材质纹理，8K，超高细节，大景深",
+  "base_negative": "特写，近景，大量人群，彩色人物，清晰人脸，鲜艳高饱和色彩，大面积霓虹灯光，卡通，二次元，手绘，疯狂藤蔓吞噬墙体，严重崩塌废墟，小巧道具，封闭狭小室内，正面平光，无雾，杂乱构图，过度曝光，畸形建筑，大量飞行器、车辆，文字水印，人物尺寸过大，人物位于画面视觉中心，清晰五官，多个人物",
+  "user_input_tpl": {
+    "hint_text": "输入画面主体；留空则AI自动创作全新主体创意",
+    "splice_rule": "主体内容放在正向提示词最前方，英文逗号分隔拼接",
+    "input_limit": "禁止输入：二次元、赛博霓虹、大量人群、室内场景、重度废墟"
+  },
+  "dynamic_subject_generator": {
+    "enable": true,
+    "generate_prompt": "输出标准JSON结构，包含subject、target_style。题材限定：粗野主义巨型城邦、环世界构造、浮空人造巨型建筑。subject为一句简短场景描述，20–30字。主体为完整巨型人造构筑物，尽量避开重度废墟。严格禁止混搭题材，人物不可作为主体。格式示例：{\"subject\":\"xxx\",\"target_style\":\"B站原版巨构AI\"}，不要额外文字。",
+    "max_length": 30,
+    "avoid_keyword": [
+      "室内",
+      "大量人群",
+      "卡通",
+      "现代城市",
+      "小型道具",
+      "题材混搭",
+      "古风机甲",
+      "重度废墟"
+    ],
+    "refresh_button_support": true
+  },
+  "feature_switch": {
+    "silhouette_figure": true,
+    "wide_21_9": false
+  },
+  "watermark_config": {
+    "enable_watermark": false,
+    "watermark_text": "",
+    "font_size": 32,
+    "opacity": 0.12,
+    "position": "bottom_right",
+    "color": "#ffffff",
+    "rotate": 0
+  },
+  "input_ban_list": [
+    "二次元",
+    "卡通",
+    "室内",
+    "大量人群",
+    "霓虹",
+    "藤蔓废墟"
+  ],
+  "subject_rotate_mode": true,
+  "rotate_pool": [
+    "B站原版巨构AI",
+    "太古遗迹巨构",
+    "永夜冰原巨构",
+    "深海深渊巨构",
+    "东方神域巨构",
+    "古典西式巨构"
+  ],
+  "auto_ban_word": [],
+  "image_api_config": {
+    "enable_api_render": true,
+    "api_mode": "async",
+    "base_url": "http://127.0.0.1:7860/sdapi/v1/txt2img",
+    "auth_header": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {{API_KEY}}"
+    },
+    "api_key": "",
+    "submit_method": "POST",
+    "request_body_mapping": {
+      "prompt": "full_positive",
+      "negative_prompt": "base_negative",
+      "steps": "sampler_config.steps",
+      "cfg_scale": "sampler_config.cfg_scale",
+      "width": "sampler_config.width",
+      "height": "sampler_config.height",
+      "sampler_name": "sampler_config.sampler",
+      "scheduler": "sampler_config.scheduler"
+    },
+    "async_task": {
+      "enable": true,
+      "task_id_field": "task_id",
+      "status_query_url": "{{base_url}}/task/status",
+      "status_field": "status",
+      "success_state": [
+        "success",
+        "complete"
+      ],
+      "pending_state": [
+        "queue",
+        "processing",
+        "in_progress"
+      ],
+      "image_result_field": "images",
+      "result_type": "base64",
+      "poll_interval_ms": 1200,
+      "max_poll_times": 60,
+      "timeout_second": 120
+    },
+    "sync_response": {
+      "image_result_field": "images",
+      "result_type": "base64"
+    },
+    "save_path": "./output_jugou/original/",
+    "auto_save": true,
+    "file_naming_rule": "{timestamp}_{subject}.png"
+  },
+  "camera_settings": {
+    "lens_type": "24mm超广角，轻微透视畸变，画面适度倾斜",
+    "perspective": "低角度仰摄，高空远景俯瞰，对岸远距离视角，对角线构图优先",
+    "shot_type": "全景、大全景，禁用特写、近景",
+    "depth_of_field": "远景巨构清晰，云海薄雾柔化中层",
+    "composition_rule": "巨型结构体占据画面上70%区域，单人剪影放置画面底部边缘，强化体量压迫感"
+  },
+  "light_atmosphere": {
+    "light_type": "侧逆光，轮廓光，斜向穿透云层丁达尔体积光",
+    "time_preference": "拂晓、冷调黄昏、阴沉冷色天光",
+    "atmosphere_effect": "厚重层积云海、低空持续性薄雾",
+    "forbidden_light": "正面平光、正午刺眼强光、大面积金色霞光铺满画面"
+  },
+  "material_texture": {
+    "main_material": "巨型砼质粗野建筑、冷硬合金、平整风化石材",
+    "surface_feature": "细密建筑肌理、轻微风化，不强调大面积断裂残垣",
+    "avoid_material": "全新抛光镜面、塑料质感、满目断壁残垣"
+  },
+  "color_system": {
+    "base_tone": "冷灰、深海青蓝中性基底",
+    "main_color": "雾蓝、冷灰、浅赭石",
+    "accent_color": "局部淡金色轮廓光、零星微弱冷光点",
+    "color_rule": "杜绝大面积高饱和撞色，整体偏冷暗克制色调"
+  },
+  "core_mood": "孤寂苍茫，砼核美学，巨型构造的压迫感，个体渺小的静谧史诗感",
+  "style_keywords_short": "巨构美学,砼核,尺度反差,巨型城邦,环世界,云海丁达尔,倾斜超广角,写实史诗",
+  "sampler_config": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 24,
+    "cfg_scale": 7,
+    "width": 1792,
+    "height": 1024,
+    "aspect_ratio": "16:9"
+  },
+  "post_process": {
+    "sharpness": 1.15,
+    "contrast": 1.08,
+    "vignette": true,
+    "saturation_limit": 0.9
+  },
+  "lora_recommend": "",
+  "vae": "auto",
+  "auto_append_rule": "开启，自动追加倾斜广角、云海雾效关键词",
+  "caption_group": {
+    "short_text": "当巨物矗立，人类不过尘埃。#巨构AI #砼核 #概念艺术",
+    "medium_text": "巨型结构体静静横亘云海之上。宏大构造面前，人影渺小如尘埃，永恒的沉默笼罩整片天地。#巨构AI #史诗场景 #砼核美学",
+    "long_text": "倾斜广角望向云海之上的巨型巨构，斜向光束穿过层积云层。黑色人影伫立边缘，在非人尺度的人造建筑面前，感受沉默与苍茫。#巨构AI #砼核 #巨物美学 #AI场景原画",
+    "hashtags": [
+      "巨构AI",
+      "砼核",
+      "巨构美学",
+      "AI场景原画",
+      "史诗环境",
+      "概念艺术"
+    ]
+  },
+  "audio_bgm": {
+    "style_tag": "史诗、孤寂、氛围纯音乐、慢节奏、低沉管弦、无激烈鼓点",
+    "keyword_search": "epic ambient, lonely orchestral, dark atmosphere, cinematic ambient",
+    "suggest_type": "规避重金属、快节奏电子乐；优先绵长弦乐、极简史诗配乐"
+  },
+  "config_note": "V2版本；原版砼质巨型城邦；支持自动风格切换、主体自动修复、随机构图光影、自定义正向后缀、图片水印"
+}

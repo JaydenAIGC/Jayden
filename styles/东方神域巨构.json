@@ -1,0 +1,31 @@
+{
+  "style_name": "东方神域巨构",
+  "art_style": "cinematic environment concept art, 3A game scene design, realistic render, concept painting, Unreal引擎质感, Octane渲染, 东方玄幻美学",
+  "base_positive": "超广角大全景，低角度仰拍，东方玄幻巨型结构体，悬浮仙山，巨型石质神像，通天巨型石阶，云海之上的上古东方神殿，巨型楼阁与山体相融，画面底部渺小单人黑色剪影，极致尺度反差，纵深透视，大气透视，丁达尔光束穿透云层，厚重云海，低空薄雾，空气尘埃，拂晓金色霞光，暖金色轮廓光，巨型风化玉石材质，远古浮雕龙纹石刻，浮雕纹饰，轻微风化痕迹，零星金色灵光点缀，低饱和暖灰金色调，苍茫神域孤寂氛围，电影级布光，概念场景设计，写实渲染，细腻材质纹理，8K，超高细节，大景深",
+  "base_negative": "特写，近景，大量人群，彩色人物，清晰人脸，鲜艳高饱和色彩，霓虹灯光，卡通，二次元，手绘，密集现代都市，赛博朋克元素，科幻机甲，太空飞船，小巧道具，封闭狭小室内，正面平光，无雾，杂乱构图，过度曝光，畸形建筑，文字水印，人物尺寸过大，人物位于画面视觉中心，清晰五官，多个人物",
+  "dynamic_subject_generate_prompt": "随机单一题材创作画面主体，可选择题材：东方玄幻悬浮仙山 / 上古神域巨型神像 / 云海之上的神殿遗迹。输出一句简短精炼场景描述，20-30字。主体为东方玄幻风格的巨型构筑物，金色霞光氛围，云雾缭绕，禁止混搭科幻元素，人物不能作为主体。只输出主体文案。",
+  "feature_switch": {
+    "human_figure": true,
+    "golden_rim": true,
+    "cloud_sea": true
+  },
+  "captions": {
+    "short": "神域遗迹横亘云海，仙山浮空万古长存。#东方神域 #玄幻巨构",
+    "medium": "上古东方神域，巨型石质神殿悬浮于云海之上。金色霞光勾勒出远古神像轮廓，渺小独行者仰望这跨越万古的神迹。#东方神域 #玄幻遗迹 #巨构美学",
+    "long": "超广角仰视云海之上的东方神域，巨型神像与悬浮仙山在金色霞光中若隐若现。丁达尔光束穿透云层，暖金轮廓光勾勒出远古雕刻的纹路。在这片被时间遗忘的神域面前，个体渺小如尘埃。#东方神域 #悬浮仙山 #概念艺术 #AI场景原画",
+    "hashtags": "东方神域 悬浮仙山 玄幻巨构 AI场景原画 概念艺术"
+  },
+  "bgm_keywords": "oriental ambient, ethereal orchestral, ancient chinese atmosphere, cinematic fantasy",
+  "image_api_config": {
+    "save_path": "./output/eastern/"
+  },
+  "sampler_config": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 24,
+    "cfg_scale": 7,
+    "width": 1792,
+    "height": 1024,
+    "aspect_ratio": "16:9"
+  }
+}

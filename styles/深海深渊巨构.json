@@ -1,0 +1,176 @@
+{
+  "style_name": "深海深渊巨构",
+  "art_style": "cinematic environment concept art, 3A game scene design, realistic render, concept painting, 影视级环境概念原画，3A游戏场景，写实渲染，Unreal引擎质感，Octane渲染，深海深渊巨构美学",
+  "style_type": "场景概念美术",
+  "render_type": "Unreal / Octane 写实渲染质感",
+  "auto_switch_style": false,
+  "auto_fix_subject": true,
+  "random_composition": false,
+  "random_light": false,
+  "custom_positive_suffix": "",
+  "base_positive": "倾斜超广角大全景，对角线构图，24mm广角镜头，轻微透视畸变，水下巨型远古结构体，海底巨型神殿、海蚀巨型遗迹、深渊外星构筑，悬浮海流浊流，水中浮游微粒，纵深水下透视，穿透海水淡蓝丁达尔光束，深海幽暗环境，微弱生物冷光，巨型海蚀石材、水下锈蚀金属基座，少量海藻零星附着，低饱和深蓝暗调，幽寂压抑氛围，电影级柔和水下布光，概念场景设计，写实渲染，细腻材质纹理，8K，超高细节，大景深",
+  "base_negative": "特写，近景，大量人群，清晰人脸，明亮日光，暖金色霞光，干旱陆地，丛林植被，霓虹灯光，卡通，二次元，手绘，空中云海，雪山，小巧道具，封闭狭小室内，正面强光，杂乱构图，过度曝光，畸形建筑，大量飞行器，文字水印，人物尺寸过大，人物位于画面视觉中心，清晰五官，多个人物",
+  "user_input_tpl": {
+    "hint_text": "输入画面主体；留空则AI自动创作全新主体创意",
+    "splice_rule": "主体内容放在正向提示词最前方，英文逗号分隔拼接",
+    "input_limit": "禁止输入：陆地场景、云海、雪山、二次元、大量人群"
+  },
+  "dynamic_subject_generator": {
+    "enable": true,
+    "generate_prompt": "输出标准JSON结构，包含subject、target_style。题材限定：深海海底巨型神殿、海蚀远古遗迹、深渊外星巨型构筑。输出一句简短场景描述，20–30字。场景固定水下深海环境，禁止陆地云海元素。严格禁止混搭题材，人物不可作为主体。格式示例：{\"subject\":\"xxx\",\"target_style\":\"深海深渊巨构\"}，不要额外文字。",
+    "max_length": 30,
+    "avoid_keyword": [
+      "室内",
+      "大量人群",
+      "卡通",
+      "陆地",
+      "云海",
+      "雪山",
+      "题材混搭",
+      "古风机甲"
+    ],
+    "refresh_button_support": true
+  },
+  "feature_switch": {
+    "silhouette_figure": true,
+    "wide_21_9": false
+  },
+  "watermark_config": {
+    "enable_watermark": false,
+    "watermark_text": "",
+    "font_size": 32,
+    "opacity": 0.12,
+    "position": "bottom_right",
+    "color": "#ffffff",
+    "rotate": 0
+  },
+  "input_ban_list": [
+    "二次元",
+    "卡通",
+    "室内",
+    "大量人群",
+    "陆地",
+    "云海",
+    "雪山"
+  ],
+  "subject_rotate_mode": true,
+  "rotate_pool": [
+    "B站原版巨构AI",
+    "太古遗迹巨构",
+    "永夜冰原巨构",
+    "深海深渊巨构",
+    "东方神域巨构",
+    "古典西式巨构"
+  ],
+  "auto_ban_word": [],
+  "image_api_config": {
+    "enable_api_render": true,
+    "api_mode": "async",
+    "base_url": "http://127.0.0.1:7860/sdapi/v1/txt2img",
+    "auth_header": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {{API_KEY}}"
+    },
+    "api_key": "",
+    "submit_method": "POST",
+    "request_body_mapping": {
+      "prompt": "full_positive",
+      "negative_prompt": "base_negative",
+      "steps": "sampler_config.steps",
+      "cfg_scale": "sampler_config.cfg_scale",
+      "width": "sampler_config.width",
+      "height": "sampler_config.height",
+      "sampler_name": "sampler_config.sampler",
+      "scheduler": "sampler_config.scheduler"
+    },
+    "async_task": {
+      "enable": true,
+      "task_id_field": "task_id",
+      "status_query_url": "{{base_url}}/task/status",
+      "status_field": "status",
+      "success_state": [
+        "success",
+        "complete"
+      ],
+      "pending_state": [
+        "queue",
+        "processing",
+        "in_progress"
+      ],
+      "image_result_field": "images",
+      "result_type": "base64",
+      "poll_interval_ms": 1200,
+      "max_poll_times": 60,
+      "timeout_second": 120
+    },
+    "sync_response": {
+      "image_result_field": "images",
+      "result_type": "base64"
+    },
+    "save_path": "./output_jugou/deepsea/",
+    "auto_save": true,
+    "file_naming_rule": "{timestamp}_{subject}.png"
+  },
+  "camera_settings": {
+    "lens_type": "24mm超广角，轻微透视畸变，画面适度倾斜",
+    "perspective": "低角度仰摄，水下远景视角，对角线构图优先",
+    "shot_type": "全景、大全景，禁用特写、近景",
+    "depth_of_field": "远景巨构清晰，水中浊流柔化中层",
+    "composition_rule": "巨型结构体占据画面上70%区域，单人剪影放置画面底部边缘，强化体量压迫感"
+  },
+  "light_atmosphere": {
+    "light_type": "水下穿透丁达尔，微弱幽蓝生物冷光",
+    "time_preference": "永恒深海幽暗环境",
+    "atmosphere_effect": "水体浊流、水中悬浮微粒、缓慢海流",
+    "forbidden_light": "直射强光、大面积阳光、金色霞光"
+  },
+  "material_texture": {
+    "main_material": "海蚀巨型石材、水下锈蚀金属基座",
+    "surface_feature": "海水侵蚀痕迹、少量海藻附着",
+    "avoid_material": "干燥陆地岩石、冰雪、茂密丛林"
+  },
+  "color_system": {
+    "base_tone": "深海深蓝、暗靛基底",
+    "main_color": "深蓝、暗青、灰蓝",
+    "accent_color": "淡蓝色水下光束、零星幽蓝生物微光",
+    "color_rule": "整体幽暗深蓝，压低亮度，杜绝暖色调"
+  },
+  "core_mood": "深渊幽寂，水下巨构美学，深海压抑感，亘古沉默",
+  "style_keywords_short": "深海深渊巨构,水下遗迹,海蚀构造,水体丁达尔,倾斜超广角,写实史诗",
+  "sampler_config": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 24,
+    "cfg_scale": 7,
+    "width": 1792,
+    "height": 1024,
+    "aspect_ratio": "16:9"
+  },
+  "post_process": {
+    "sharpness": 1.15,
+    "contrast": 1.08,
+    "vignette": true,
+    "saturation_limit": 0.88
+  },
+  "lora_recommend": "",
+  "vae": "auto",
+  "auto_append_rule": "开启，自动追加倾斜广角、水下浊流、深海环境关键词",
+  "caption_group": {
+    "short_text": "深渊海底沉睡着巨型造物，深海无边幽暗。#深海巨构 #概念艺术",
+    "medium_text": "亿万年前的巨型构造静卧深海，海流缓缓拂过海蚀墙体，与世隔绝，永不见天光。#深海巨构 #史诗场景",
+    "long_text": "倾斜广角望向深海之下的远古巨型遗迹，淡蓝光束穿透浑浊海水。人影浮游深渊，感受海底巨构的静谧与压抑。#深海巨构 #巨物美学 #AI场景原画",
+    "hashtags": [
+      "深海巨构",
+      "巨构美学",
+      "水下遗迹",
+      "AI场景原画",
+      "深渊概念艺术"
+    ]
+  },
+  "audio_bgm": {
+    "style_tag": "幽暗氛围、缓慢深海纯音乐、低频绵长，压抑孤寂，无激烈鼓点",
+    "keyword_search": "deep sea ambient, dark underwater cinematic, lonely abyss",
+    "suggest_type": "避开明快曲风；优先低频深海氛围配乐"
+  },
+  "config_note": "V2版本；深海水下巨构；全程水下环境；完整支持V2全部自动化功能"
+}

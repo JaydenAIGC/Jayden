@@ -1,0 +1,104 @@
+{
+  "style_name": "【模板】自定义风格",
+
+  "style_type": "场景概念美术",
+  "render_type": "Unreal / Octane 写实渲染质感",
+
+  "style_keywords_short": "自定义,史诗场景,概念艺术",
+  "core_mood": "自定义氛围描述，孤寂苍茫、史诗感等",
+
+  "feature_switch": {
+    "auto_switch_style": false,
+    "auto_fix_subject": true
+  },
+
+  "scene_category": ["自定义题材A","自定义题材B","自定义题材C"],
+
+  "art_style": "cinematic environment concept art, 3A game scene design, realistic render, concept painting",
+  "base_positive": "超广角大全景，低角度仰拍，纵深透视，大气透视，丁达尔体积光束，薄雾，空气尘埃，电影级布光，概念场景设计，写实渲染，细腻材质纹理，8K，超高细节，大景深",
+  "base_negative": "特写，近景，大量人群，鲜艳高饱和色彩，卡通，二次元，干净崭新建筑，光滑无磨损物体，室内狭小空间，平光，无雾，杂乱构图，过度曝光，畸形物体，模糊主体",
+
+  "user_input_tpl": {
+    "hint_text": "输入画面主体；留空则AI自动创作",
+    "splice_rule": "主体内容放在正向提示词最前方，英文逗号拼接",
+    "input_ban_list": ["二次元","现代城市","室内场景"]
+  },
+
+  "dynamic_subject_generator": {
+    "enable": true,
+    "generate_prompt": "随机选择单一题材创作画面主体，输出一句简短精炼的场景描述，20–30字。不要任何额外解释。",
+    "max_length": 30,
+    "avoid_keyword": ["室内","大量人群","卡通","现代城市"],
+    "refresh_button_support": true
+  },
+
+  "camera_settings": {
+    "lens_type": "超广角，20mm镜头",
+    "perspective": "低角度仰摄，高空俯瞰",
+    "shot_type": "全景、大全景",
+    "depth_of_field": "远景清晰，中远景薄雾柔化",
+    "composition_rule": "主体占画面上70%，人物放底部"
+  },
+
+  "light_atmosphere": {
+    "light_type": "侧逆光，轮廓光，体积光",
+    "time_preference": "黄昏、拂晓、阴沉天光",
+    "atmosphere_effect": "持续性薄雾、云层",
+    "forbidden_light": "正面平光、强光直射"
+  },
+
+  "material_texture": {
+    "main_material": "风化石料、锈蚀金属、老旧混凝土",
+    "surface_feature": "裂纹、风化剥落、青苔",
+    "avoid_material": "全新抛光材质、塑料质感"
+  },
+
+  "color_system": {
+    "base_tone": "低灰度中性基底",
+    "main_color": "青灰色、土黄、雾霾蓝",
+    "accent_color": "微弱冷光、霞光暖光",
+    "color_rule": "杜绝大面积高饱和撞色"
+  },
+
+  "sampler_config": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 24,
+    "cfg_scale": 7,
+    "width": 1792,
+    "height": 1024,
+    "aspect_ratio": "16:9"
+  },
+
+  "post_process": {
+    "sharpness": 1.15,
+    "contrast": 1.08,
+    "vignette": true,
+    "saturation_limit": 0.92
+  },
+
+  "lora_recommend": "",
+  "vae": "auto",
+  "auto_append_rule": "开启，自动追加镜头、大气雾效关键词",
+  "auto_ban_word": [],
+
+  "image_api_config": {
+    "enable_api_render": true,
+    "api_mode": "async",
+    "base_url": "http://127.0.0.1:7860/sdapi/v1/txt2img",
+    "save_path": "./output/",
+    "auto_save": true,
+    "file_naming_rule": "{timestamp}_{subject}.png"
+  },
+
+  "caption_group": {
+    "short_text": "史诗场景 #概念艺术 #AI绘画",
+    "medium_text": "宏大场景静静伫立，渺小旅人见证失落时代。",
+    "long_text": "宏大遗迹横亘天地，巨大构造物压迫视野。在绝对宏伟面前，个体渺小到不值一提。#史诗美学",
+    "hashtags": ["概念场景","AI绘画","史诗环境"]
+  },
+
+  "bgm_keywords": "epic ambient, lonely orchestral, dark atmosphere, cinematic ambient",
+
+  "config_note": "此文件为模板，所有字段均可修改。新增风格JSON放入styles文件夹后重启即可自动识别。"
+}
