@@ -694,7 +694,7 @@ async function genIdeas(){
   const c=document.createElement("div");c.className="card";
   c.innerHTML=`<div class="idx">#${i+1}
    <span style="float:right;font-size:9px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">📄完整</span></div>
-   <div class="desc" id="desc${i}" ondblclick="editDesc(${i})">${fp}</div>
+   <div class="desc" id="desc${i}" ondblclick="editDesc(${i})">${d}</div>
    <div class="acts">
     <button class="btng btng-p" style="font-size:11px;padding:4px 10px" onclick="genImg(${i})">生图</button>
     <button class="btng btng-s" style="font-size:11px;padding:4px 10px" onclick="redoDesc(${i})">重写</button>
