@@ -43,9 +43,9 @@ class Backend:
                     with open(os.path.join(bd,fn),"r",encoding="utf-8") as f: bs.append(json.load(f))
                 except: pass
         return bs
-    def _new_batch(self,subject,style,descs):
+    def _new_batch(self,subject,descs):
         bid=datetime.now().strftime("%Y%m%d_%H%M%S")
-        b={"id":bid,"subject":subject,"style":style,"created":bid,"descriptions":descs,"images":[],"marketing":[]}
+        b={"id":bid,"subject":subject,"created":bid,"descriptions":descs,"images":[],"marketing":[]}
         bd=self._batch_dir()
         with open(os.path.join(bd,f"{bid}.json"),"w",encoding="utf-8") as f: json.dump(b,f,ensure_ascii=False,indent=2)
         return bid
@@ -476,8 +476,8 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
         data=json.loads(body) if body else {}
         p=urlparse(self.path).path;resp={"ok":False}
         try:
-            if p=="/api/gen_desc": resp=backend.gen_desc(data.get("subject",""),int(data.get("count",3)),data.get("rotate",False),backend.style_name)
-            elif p=="/api/gen_ideas": resp=backend.gen_subject_ideas(data.get("style",""))
+            if p=="/api/gen_desc": resp=backend.gen_desc(data.get("subject",""),int(data.get("count",3)))
+            elif p=="/api/gen_ideas": resp=backend.gen_subject_ideas()
             elif p=="/api/gen_one": resp=backend.gen_one_desc()
             elif p=="/api/optimize": resp=backend.optimize_descs(data.get("descriptions",[]),data.get("style",""))
             elif p=="/api/generate": resp=backend.generate(data.get("desc",""),data.get("comp",False),data.get("light",False),data.get("size","1024x1792"),data.get("prompt",""),data.get("human",True),data.get("batch_id",""),int(data.get("desc_idx",0)))
