@@ -313,8 +313,33 @@ class Backend:
         return {"Authorization":f"Bearer {k}","Content-Type":"application/json","Accept-Encoding":"identity"}
 backend=Backend()
 
+AUTH_TOKEN = os.environ.get("AUTH_TOKEN","")
+
 class Handler(http.server.BaseHTTPRequestHandler):
+    def _check_auth(self):
+        if not AUTH_TOKEN: return True
+        ck=self.headers.get("Cookie","")
+        return f"token={AUTH_TOKEN}" in ck
+    def _login_page(self):
+        self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
+        self.wfile.write(f"""<!DOCTYPE html><html><head><meta charset="utf-8"><title>街灯AI--场景生成器</title>
+<style>
+body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}}
+.box{{background:#18181c;border:1px solid #333;border-radius:12px;padding:40px;width:340px;text-align:center}}
+.box h2{{margin-bottom:20px;font-size:18px;color:var(--accent2);}}
+.box input{{width:100%;padding:10px;border:1px solid #333;border-radius:6px;background:#222;color:#e8e8ed;font-size:14px;outline:none;margin-bottom:16px;box-sizing:border-box}}
+.box button{{width:100%;padding:10px;border:none;border-radius:6px;background:#6c5ce7;color:#fff;font-size:14px;cursor:pointer}}
+.box button:hover{{background:#5a4bd1}}
+.box .err{{color:#e17055;font-size:13px;margin-bottom:10px}}
+</style></head><body>
+<div class="box"><h2>🔐 JaydenAI</h2>
+<form method="post" action="/">
+<input type="password" name="token" placeholder="输入访问密码" autofocus/>
+<button type="submit">进入</button>
+</form></div></body></html>""".encode())
     def do_GET(self):
+        if not self._check_auth():
+            self._login_page(); return
         if self.path=="/":
             self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
             self.wfile.write(HTML.encode("utf-8"))
@@ -331,6 +356,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
             os.startfile(os.path.join(BASE_DIR,"output"));self._json({"ok":True})
         else: self.send_error(404)
     def do_POST(self):
+        if AUTH_TOKEN and not self._check_auth():
+            self._json({"ok":False,"error":"未授权"}); return
+        if self.path=="/":
+            length=int(self.headers.get("Content-Length",0))
+            body=self.rfile.read(length).decode() if length else ""
+            import urllib.parse
+            params=urllib.parse.parse_qs(body)
+            tk=params.get("token",[None])[0]
+            if tk==AUTH_TOKEN:
+                self.send_response(302);self.send_header("Set-Cookie",f"token={AUTH_TOKEN}; Path=/; Max-Age=86400");self.send_header("Location","/");self.end_headers()
+            else:
+                self.send_response(200);self.send_header("Content-Type","text/html;charset=utf-8");self.end_headers()
+                self.wfile.write(f"""<!DOCTYPE html><html><body style="background:#0f0f13;color:#e8e8ed;display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui"><div style="text-align:center"><p style="color:#e17055;margin-bottom:16px">❌ 密码错误</p><a href="/" style="color:#6c5ce7">重新输入</a></div></body></html>""".encode())
+            return
         length=int(self.headers.get("Content-Length",0))
         body=self.rfile.read(length).decode() if length else ""
         data=json.loads(body) if body else {}
