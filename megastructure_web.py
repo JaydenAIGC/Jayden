@@ -433,7 +433,7 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
 .box button{{width:100%;padding:10px;border:none;border-radius:6px;background:#6c5ce7;color:#fff;font-size:14px;cursor:pointer}}
 .box button:hover{{background:#5a4bd1}}
 .box .err{{color:#e17055;font-size:13px;margin-bottom:10px}}
-</style></head><body><div class="bg-mid3"></div>
+</style></head><body><div class="bg-mid3"></div><div class="watermark">JAYDEN AI</div>
 <div class="box"><h2>🔐 JaydenAI</h2>
 <form method="post" action="/">
 <input type="password" name="token" placeholder="输入访问密码" autofocus/>
@@ -543,6 +543,7 @@ body::before{content:'';position:fixed;top:-30%;left:-15%;width:80%;height:80%;b
 body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60%;background:radial-gradient(ellipse at 70% 80%,rgba(0,206,201,.14) 0%,rgba(6,182,212,.05) 40%,transparent 70%);animation:dGlow2 14s ease-in-out infinite alternate;pointer-events:none;z-index:0}
 /* 第三层中部暖色光晕 */
 .bg-mid3{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);width:50%;height:40%;background:radial-gradient(ellipse at center,rgba(255,200,100,.06) 0%,transparent 60%);animation:dGlow3 18s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+.watermark{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:8px 0 12px;font-size:11px;font-weight:600;letter-spacing:3px;color:rgba(108,92,231,.15);pointer-events:none;z-index:0;user-select:none}
 @keyframes dGlow{0%{transform:translate(0,0) scale(1)}100%{transform:translate(8%,6%) scale(1.25)}}
 @keyframes dGlow2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-6%,-4%) scale(1.2)}}
 @keyframes dGlow3{0%{opacity:.5;transform:translate(-50%,-50%) scale(1)}100%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
