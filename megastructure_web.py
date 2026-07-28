@@ -694,8 +694,10 @@ body{font-size:13px;overflow:auto}
 </head>
 <body>
 <div class="header">
- <h1>街灯AI</h1>
- <span style="font-size:10px;color:var(--hint);font-weight:400;margin-right:auto">desgin by jayden</span>
+ <div style="display:flex;flex-direction:column;line-height:1.2;flex-shrink:0">
+  <h1 style="margin:0;font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">街灯AI</h1>
+  <span style="font-size:9px;color:var(--hint);font-weight:400;letter-spacing:1px">desgin by jayden</span>
+ </div>
  <div style="flex:1"></div>
  <button class="tab act" onclick="showTab('gen')" id="tabGen">生成</button>
  <button class="tab" onclick="showTab('lib')" id="tabLib">图库 <span id="galleryCount" style="font-size:9px;color:var(--accent2)"></span></button>
