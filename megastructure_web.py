@@ -176,15 +176,17 @@ class Backend:
 {{"subject":"场景描述文本","target_style":"{style_name}"}}
 
 面向gpt-image-2绘图模型优化，核心规则（必须遵守）：
-- ⚠️ **同主体原则**：{count}条必须是**同一个建筑/同一个主体**，不能替换为其他建筑
-- ⚠️ **共性原则**：建筑形态、结构细节（拱门/石柱/穹顶/台阶等）、材质（石料/锈蚀/风化等）、色调、光线时段必须**完全一致**
-- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼→俯瞰，但建筑本身不能变
+- ⚠️ **同环境同主体**：{count}条必须是**同一地貌环境+同一建筑主体**，地貌（冰原/沙漠/深海等）和建筑都不能变
+- ⚠️ **共性原则**：地貌环境、建筑形态、结构细节（拱门/石柱/穹顶/台阶等）、材质（石料/锈蚀/风化等）、色调、光线时段必须**完全一致**
+- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼→俯瞰，但环境和建筑本身不能变
+- ⚠️ 禁止环境变化——第一条是冰原雪地，后面就不能变成沙漠或戈壁
 - ⚠️ 禁止生成完全不同场景——比如第一条写了石质拱门建筑，后面就不能变成金属塔楼或完全不同构造
 - 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境来制造压迫感
 - 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声、无垠
 - subject要求**100-150字**，强化：空间层次（前后远近）、材质质感（石材纹理/风化/锈蚀）、光线方向与色温
-- 结构必须包含：地貌环境 + 建筑主体形态 + 结构细节（支柱/拱券/塔楼/台阶/穹顶等）+ 材质质感 + 空间位置
-- 句式：环境地貌 + 巨型主体建筑 + 结构细节描述 + 空间位置形态
+- ⚠️ **句式差异化**：每条的后半段不能相同，避免出现"立于……之中""静静矗立于……"等雷同收尾
+- ⚠️ **每条要有不同的收尾方式**：有的聚焦光影，有的聚焦空间纵深，有的聚焦材质细节
+- **全程用中文描述，不要夹杂英文**
 - 禁止人物、特写、小型物件（人物由后续优化步骤统一添加）
 - 禁止短句、禁止笼统概括"""
         else:
@@ -192,16 +194,16 @@ class Backend:
 {{"subject":"场景描述文本","target_style":"{style_name}"}}
 
 面向gpt-image-2绘图模型优化，核心规则（必须遵守）：
-- ⚠️ **同主体原则**：{count}条必须是**同一个建筑/同一个主体**，不能替换为其他建筑
-- ⚠️ **共性原则**：建筑形态、结构细节、材质、色调、光线时段必须**完全一致**
+- ⚠️ **同环境同主体**：{count}条必须是**同一地貌环境+同一建筑主体**，都不能变
+- ⚠️ **共性原则**：地貌、建筑形态、结构细节、材质、色调、光线时段必须**完全一致**
 - 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼
-- ⚠️ 禁止生成完全不同场景——建筑身份不能变
+- ⚠️ 禁止环境变化，禁止生成完全不同场景
 - 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境制造压迫感
 - 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声
 - subject要求**100-150字**，强化：空间层次、材质质感、光线方向与色温
-- 结构必须包含：地貌环境 + 建筑主体形态 + 结构细节（支柱/拱券/塔楼/台阶/穹顶等）+ 材质质感 + 空间位置
-- 句式：环境地貌 + 巨型主体建筑 + 结构细节描述 + 空间位置形态
-- ⚠️ 色彩基调、光线时段必须全统一
+- ⚠️ **句式差异化**：每条的后半段不能相同，不能都以"静静矗立在……"收尾
+- ⚠️ **每条收尾方式不同**：光影、纵深、材质细节各选其一
+- **全程用中文描述，不要夹杂英文**
 - target_style必须="{style_name}"
 - 禁止人物、特写、小型物件（人物由后续优化步骤统一添加）
 - 禁止短句、禁止笼统概括"""
@@ -311,31 +313,56 @@ class Backend:
             h=self._headers("llm")
             txt="\n".join([f"{i+1}. {d}" for i,d in enumerate(descs)])
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
-               "messages":[{"role":"user","content":f"""你是一名gpt-image-2绘图模型的提示词优化师。对以下{len(descs)}条巨构场景描述词进行**自由重构优化**，目标是让gpt-image-2理解得更准、画得更好。
+               "messages":[{"role":"user","content":f"""你是一名场景全面优化师。对以下{len(descs)}条描述词进行**全面优化**，输出JSON数组：
 
-**你可以做的（不限以下）：**
-- 打乱重组语序结构，让描述更符合绘图模型的理解习惯
-- 改写润色，用更具画面感的语言替换平淡表达
-- 增删调整，补充缺失的视觉细节，删减冗余
-- 在每条场景中自然地融入一个极小的人物（位置姿态适配建筑环境，不是纯剪影，保留轮廓细节但体积极小不占视觉中心）
+[
+  {{"description":"优化后的场景描述","人物":"人物位置和动作描述","构图":"构图建议","视角":"建议的视角方向"}},
+  ...
+]
+
+当前风格：「{style}」
+
+**描述优化（必须做）：**
+- 根据主体特性做差异化润色——石头强化岩石质感，金属强化冰冷锈蚀，木材强化腐朽纹理
+- 用更具画面感的语言替换平淡表达，后半段收尾方式各不相同
 - 强化空间层次、材质质感、光线方向与色温、景深
+- 全程用中文描述
 
-**约束：**
-- 保持原主题和风格「{style}」不变
-- 保持原有视角构图方向（远景/中景/仰视等）
-- 每条约100-150字，色调整体统一
+**人物优化（必须做）：**
+- 为每条设计一个极小的人物（位置+姿态），仅作尺度参照
+- 位置：画面底部/门洞下方/台阶尽头/平台边缘/石柱旁
+- 姿态：静立/仰望/缓步/背对/驻足/撑伞/拄杖
 
-只返回优化后的文本，每行一条，不要编号，不要JSON，不要解释：
+**构图优化（必须做）：**
+- 每条根据其视角和场景特点，推荐**最合适的构图方式**，不要套固定对应关系
+- 每条构图不能相同，要有差异化
+- 选项参考：三分法/引导线/框架构图/对称/黄金分割/纵深透视/低角度等，灵活选择
 
-{txt}"""}],
+【现有描述词】
+{txt}
+
+只输出JSON数组，不要多余文字"""}],
                "max_tokens":4096,"temperature":0.5}
             r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=60)
             r.raise_for_status()
             raw=r.json()["choices"][0]["message"]["content"]
-            lines=[l.strip().lstrip("0123456789.、）) ") for l in raw.split("\n") if l.strip() and len(l.strip())>20]
-            if not lines: return {"ok":False,"error":"优化返回为空"}
-            prompts=[self.build_prompt(d,False,False,self.config.get("keep_human",True),"1024x1792") for d in lines[:len(descs)]]
-            return {"ok":True,"optimized":lines[:len(descs)],"prompts":prompts}
+            import re
+            # 尝试解析JSON
+            optimized=[];humans=[];compositions=[]
+            m=re.search(r'\[.*?\]',raw,re.DOTALL)
+            if m:
+                try:
+                    data=json.loads(m.group())
+                    for item in data:
+                        optimized.append(item.get("description",""))
+                        humans.append(item.get("人物",""))
+                        compositions.append(item.get("构图",""))
+                except: pass
+            if not optimized:
+                lines=[l.strip().lstrip("0123456789.、）) ") for l in raw.split("\n") if l.strip() and len(l.strip())>20]
+                optimized=lines[:len(descs)]
+            prompts=[self.build_prompt(d,False,False,self.config.get("keep_human",True),"1024x1792") for d in optimized[:len(descs)]]
+            return {"ok":True,"optimized":optimized[:len(descs)],"prompts":prompts,"humans":humans,"compositions":compositions}
         except Exception as e: return {"ok":False,"error":f"优化异常: {str(e)[:80]}"}
     def build_prompt(self,desc,comp=False,light=False,human=True,size="1024x1792"):
         bp=self.STYLE.get("base_positive",""); art=self.STYLE.get("art_style","")
@@ -578,6 +605,10 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .g-batch-img img{width:100%;height:120px;object-fit:cover;border-radius:4px;cursor:zoom-in}
 .g-batch-txt{font-size:9px;color:var(--hint);padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-batch-poem{width:100%;font-size:12px;color:var(--accent2);font-style:italic;padding:6px 0;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;line-height:1.6}
+/* 图库工具栏 */
+.g-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.g-toolbar input{flex:1;min-width:120px;background:var(--input);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:12px;color:var(--text);outline:none}
+.g-toolbar input:focus{border-color:var(--accent)}
 /* 卡片式图库 */
 .g-batch-card{display:flex;gap:8px;background:var(--card);border-radius:6px;border:1px solid var(--border);overflow:hidden;margin-bottom:6px;break-inside:avoid}
 .g-batch-card:hover{border-color:var(--accent)}
@@ -894,7 +925,15 @@ async function optimizeAll(){
  if(!r.ok||!r.optimized){st("优化失败: "+(r.error||"未知"),"var(--warn)");return}
  for(let i=0;i<r.optimized.length&&i<CARDS.length;i++){
   CARDS[i].desc=r.optimized[i];CARDS[i].prompt=r.prompts?.[i]||r.optimized[i];
-  document.getElementById("desc"+i).textContent=CARDS[i].prompt;
+  document.getElementById("desc"+i).textContent=CARDS[i].desc;
+  // 显示人物和构图信息
+  const tags=document.getElementById("tags"+i);
+  if(tags){
+   let extra="";
+   if(r.humans?.[i]) extra+=` 🧑${r.humans[i].slice(0,15)}`;
+   if(r.compositions?.[i]) extra+=` 📐${r.compositions[i].slice(0,10)}`;
+   if(extra) tags.innerHTML+=extra;
+  }
  }
  st("优化完成 "+r.optimized.length+" 条","var(--accent2)");
 }
@@ -995,7 +1034,7 @@ function showTab(t){
  document.getElementById("tabLib").className="tab"+(t=="lib"?" act":"");
  document.getElementById("gwrap").style.display=t=="gen"?"block":"none";
  document.getElementById("gallery").className="gallery"+(t=="lib"?" show":"");
- if(t=="lib")loadGallery();
+ if(t=="lib")loadGallery(document.getElementById('gSortBtn')?.dataset?.order||'');
 }
 
 async function loadGallery(){
@@ -1006,9 +1045,21 @@ async function loadGallery(){
   const batches=br.batches||[];
   const allImages=ir.images||[];
   if(!batches.length&&!allImages.length){g.innerHTML="<span style='color:var(--hint)'>暂无素材</span>";return}
-  g.innerHTML="";
+  const sqVal=(document.getElementById("gSearch")?.value||"").trim().toLowerCase();
+  let filtered=batches;
+  if(sqVal) filtered=batches.filter(b=>{
+   const txt=(b.subject||"")+" "+(b.poem||"")+" "+(b.style||"")+" "+((b.descriptions||[]).join(" "));
+   return txt.toLowerCase().includes(sqVal)
+  });
+  if(order=="oldest") filtered=[...filtered].reverse();
+  g.innerHTML=`<div class="g-toolbar">
+   <input id="gSearch" placeholder="搜索主体、故事、描述词..." value="${sqVal}" onkeydown="if(event.key=='Enter')loadGallery(document.getElementById('gSortBtn').dataset.order||'')" />
+   <button class="btng btng-d" id="gSortBtn" data-order="newest" style="font-size:10px;padding:3px 8px;white-space:nowrap" onclick="this.dataset.order=this.dataset.order=='newest'?'oldest':'newest';this.textContent=this.dataset.order=='newest'?'⏱ 最新':'⏱ 最早';loadGallery(this.dataset.order)">⏱ 最新</button>
+   ${sqVal?`<button class="btng btng-s" style="font-size:10px;padding:3px 8px" onclick="document.getElementById('gSearch').value='';loadGallery()">✕ 清除</button>`:''}
+   <span style="font-size:10px;color:var(--hint);margin-left:auto">${filtered.length}个批次</span>
+  </div>`;
   // 先显示批次
-  batches.forEach(b=>{
+  filtered.forEach(b=>{
    const imgs=b.images||[];
    const ds=b.descriptions||[];
    const n=b.subject||"未命名批次";
