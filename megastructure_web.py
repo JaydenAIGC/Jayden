@@ -372,14 +372,40 @@ class Backend:
         if light:
             lights=["晨雾浓度增加，光线更柔和","暮色更深，冷蓝色调为主","霞光增强，金色轮廓光更明显","阴沉天光，无直射光，漫反射为主","薄暮时分，天边残留微弱暖光"]
             bp+=f"，{__import__('random').choice(lights)}"
-        p=f"{desc}, {art}, {bp}" if art else desc
-        # 如果描述词已包含人物（优化后），不再追加随机人物
-        if human and not any(w in desc for w in ["人影","剪影","人物","行人","身影","背影","骑手"]):
+        # 顺序：镜头语言 → 画风标签 → 核心主体 → 环境人物 → 光影色彩 → 画质
+        # ① 镜头语言
+        lens="低角度仰拍，24mm广角镜头，三分法构图，地平线位于画面下方三分之一，深景深，全域清晰，画面上方大面积天空留白，无近距离前景遮挡"
+        # ② 画风标签
+        has_human_desc=any(w in desc for w in ["人影","剪影","人物","行人","身影","背影","骑手"])
+        if has_human_desc or human:
+            # 带人→史诗影视画风
+            style_tag="影视环境概念原画，UE5 Lumen全局光照，超写实PBR材质，宏大科幻巨构景观，结构清晰，低纹理密度，减少表面细碎纹理，柔和物理渲染"
+        else:
+            # 不带人→梦核极简画风
+            style_tag="梦核建筑，阈限空间，科幻建筑概念设计，Octane渲染，低纹理密度，光滑干净材质，无破损锈蚀，宏大孤寂景观，无手绘笔触"
+        # ③ 核心主体 从 desc 来
+        # ④ 环境
+        env="巨型主体悬浮于分层纯净云海之上，纯净渐变天空，无多余杂物，空旷大地"
+        # ⑤ 人物策略
+        neg_human=""
+        if has_human_desc:
+            pass  # AI优化已处理
+        elif human:
             import random as _r
-            pos=_r.choice(["画面底部远景","画面中景一侧","画面近景边缘","画面偏下位置","巨大门洞下方","石阶尽头","平台边缘"])
-            pose=_r.choice(["静立","缓步前行","坐","躺卧","倚靠石柱","蹲跪","骑马","撑伞站","拄杖而立","牵驼而行","负手而立","盘腿坐","侧卧","躬身前行","骑行","撑篙而立"])
-            act=_r.choice(["仰望巨构","面朝建筑方向","背对镜头眺望远方","低头前行","抬头凝望","驻足观望","缓缓走向深处"])
-            p+=f"，{pos}一个渺小的黑色剪影{pose}，{act}，体量极其微小仅作尺度参照"
+            n=_r.choice(["1个","2个","3个","4个"])
+            env+=f"，画面底部边缘有{n}极其微小的人类黑色剪影，背对镜头眺望远方，体型渺小，远景轮廓，无面部细节，无清晰服饰，仅作为建筑尺度参照物，不抢夺画面主体视觉重心"
+            neg_human="，清晰人脸，精致服饰，人群，大量行人，人物占据画面中心，近处人物，五颜六色服装"
+        else:
+            env+=f"，空无一人，无人类，无人影，不存在任何人物剪影，无行人，荒无人烟，空寂场景，无生命体，无任何人物轮廓"
+            neg_human="，人类，行人，人群，人物剪影，单人，多人，站立的人，远处人影，生命体"
+        # ⑥ 光影色彩
+        light_color="单侧柔和漫射光，单一光源，无杂乱多重光斑，低饱和柔和色调，全局仅冷白+浅金双色，均匀通透光线，无强烈硬阴影，无死黑死角"
+        # ⑦ 画质+光学
+        quality="8K超写实渲染，细腻干净纹理，画面通透，电影级渲染，柔和光学效果，无杂乱眩光，无零散星芒，无色散"
+        # 组装完整prompt
+        p=f"{desc}, {art}, {bp}" if art else desc
+        p+=f"，{lens}，{style_tag}，{env}，{light_color}，{quality}"
+        p+=f"，no deformed buildings, no clutter, no crowds, no vehicles, no birds, no trees, no billboards, no graffiti, no text, no watermark, no lens flare, no overexposure, no dead black shadows, no cartoon style, no oversaturated colors, no debris, no noise, no messy foreground{neg_human}"
         # 标注画幅尺寸
         size_map={"1024x1024":"方形构图1:1","1792x1024":"横屏宽幅16:9","1024x1792":"竖屏9:16","1344x768":"宽屏"}
         sn=size_map.get(size,"")
