@@ -125,7 +125,12 @@ class Backend:
             # 用build_prompt生成full prompt作为后备，同时把初稿作为desc
             prompts=[self.build_prompt(lines[i] if i<len(lines) else subject,False,False,self.config.get("keep_human",True),"1024x1792") for i in range(count)]
             batch_id=self._new_batch(subject or f"场景",lines[:count])
-            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id}
+            # 自动生成故事文案
+            try:
+                poem_resp=self.gen_batch_poem(batch_id)
+                poem=poem_resp.get("text","") if poem_resp.get("ok") else ""
+            except: poem=""
+            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"batch_id":batch_id,"poem":poem}
         except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:120]}"}
     def gen_one_desc(self):
         try:
@@ -941,10 +946,10 @@ async function genBatchPoem(bid){
  const btn=event.target;btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
  try{
   const r=await api("/api/gen_batch_poem",{batch_id:bid});
-  if(!r.ok){st("失败: "+(r.error||""),"var(--warn)");btn.disabled=false;btn.innerHTML='✨ 故事开头';return}
-  st("故事已生成","var(--accent2)");
+  if(!r.ok){st("失败: "+(r.error||""),"var(--warn)");btn.disabled=false;btn.innerHTML='📝 故事';return}
+  st("故事已更新","var(--accent2)");
   loadGallery();
- }catch(e){st("出错: "+e.message,"var(--warn)");btn.disabled=false;btn.innerHTML='✨ 故事开头'}
+ }catch(e){st("出错: "+e.message,"var(--warn)");btn.disabled=false;btn.innerHTML='📝 故事'}
 }
 function saveAll(){CARDS.forEach((c,i)=>{if(c.img)saveImg(i)})}
 
@@ -986,14 +991,14 @@ async function loadGallery(order){
    // 批次卡片容器
    const bdiv=document.createElement("div");bdiv.className="g-batch";
    bdiv.innerHTML=`<div class="g-batch-hd" onclick="this.nextElementSibling.classList.toggle('show')">
-    <span class="g-batch-subj">${n}</span>
+    <span class="g-batch-subj">${b.poem||n}</span>
     <span class="g-batch-meta">${b.style||''} · ${imgs.length}/${ds.length}图</span>
     <span class="g-batch-expand">▶</span>
    </div>
    ${b.poem?`<div class="g-batch-poem">${b.poem}</div>`:''}
    <div class="g-batch-body${imgs.length>0?' show':''}">
     <div style="width:100%;display:flex;gap:6px;margin-bottom:8px">
-     <button class="btng btng-d" style="font-size:9px;padding:3px 10px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写故事':'✨ 生成故事'}</button>
+     <button class="btng btng-d" style="font-size:9px;padding:3px 10px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写':'📝 故事'}</button>
     </div>
     ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':
      imgs.map((img,i)=>`<div class="g-batch-card">
