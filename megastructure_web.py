@@ -826,15 +826,27 @@ async function genIdeas(){
  const cnt=parseInt(document.getElementById("cntInp").value)||5;
  const btn=document.getElementById("genBtn");btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
  st("生成描述词...","var(--accent)");
- const r=await api("/api/gen_desc",{subject:subj,count:cnt});
+ // 逐个生成（兼容旧版一次生成多条返回空的问题）
+ let allDescs=[],allPrompts=[],batchId="";
+ for(let i=0;i<cnt;i++){
+  st(`生成中 ${i+1}/${cnt}...`,"var(--accent)");
+  const r=await api("/api/gen_desc",{subject:subj,count:1});
+  if(r.ok&&r.descriptions&&r.descriptions.length>0){
+   allDescs.push(r.descriptions[0]);
+   allPrompts.push(r.prompts?.[0]||r.descriptions[0]);
+   if(!batchId&&r.batch_id)batchId=r.batch_id;
+  }else{
+   allDescs.push(subj+" #"+(i+1));
+   allPrompts.push(subj);
+  }
+ }
  btn.disabled=false;btn.innerHTML="批量生成";
- if(!r.ok){st("失败: "+r.error,"var(--warn)");return}
- if(!r.descriptions||r.descriptions.length==0){st("无结果","var(--warn)");return}
+ if(allDescs.length==0){st("无结果","var(--warn)");return}
  const grid=document.getElementById("cardGrid");
  grid.innerHTML="";CARDS=[];
- r.descriptions.forEach((d,i)=>{
-  const fp=r.prompts?.[i]||d;
-  CARDS.push({desc:d,img:null,prompt:fp,batchId:r.batch_id||"",descIdx:i,optimized:false});
+ allDescs.forEach((d,i)=>{
+  const fp=allPrompts[i]||d;
+  CARDS.push({desc:d,img:null,prompt:fp,batchId:batchId||"",descIdx:i,optimized:false});
   const c=document.createElement("div");c.className="card";
   c.innerHTML=`<div class="idx">#${i+1}
    <span style="float:right;font-size:10px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">▼</span></div>
