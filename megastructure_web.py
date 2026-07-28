@@ -811,7 +811,7 @@ function togglePrompt(i){
 async function genIdeas(){
  const btn=document.getElementById("ideaBtn");btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
  try{
-  const r=await api("/api/gen_ideas");
+  const r=await api("/api/gen_ideas",{});
   if(!r.ok){st("灵感失败: "+(r.error||"无返回"),"var(--warn)");btn.disabled=false;btn.innerHTML="生成灵感";return}
   if(!r.ideas||!r.ideas.length){st("灵感失败: AI返回为空","var(--warn)");btn.disabled=false;btn.innerHTML="生成灵感";return}
   document.getElementById("subjInp").value=r.ideas[Math.floor(Math.random()*r.ideas.length)];
