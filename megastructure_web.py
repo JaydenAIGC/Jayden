@@ -403,7 +403,8 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
         hdir=os.path.join(BASE_DIR,"history")
         # 优先从历史库读取
         if os.path.exists(hdir):
-            files=sorted(os.listdir(hdir),reverse=True)
+            files=[f for f in os.listdir(hdir) if f.lower().endswith((".png",".jpg",".jpeg"))]
+            files.sort(key=lambda f: os.path.getmtime(os.path.join(hdir,f)), reverse=True)
             seen={}
             for f in files:
                 base=os.path.splitext(f)[0]
@@ -419,14 +420,15 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
         # 如果历史库为空，扫描旧output目录
         if not imgs:
             for root,dirs,files in os.walk(os.path.join(BASE_DIR,"output")):
-                for f in sorted(files,reverse=True)[:50]:
-                    if f.lower().endswith((".png",".jpg",".jpeg")):
-                        fp=os.path.join(root,f)
-                        imgs.append({"name":f,"prompt":"","url":f"/api/image/{os.path.relpath(fp,BASE_DIR).replace(os.sep,'/')}"})
+                imgs_png=[f for f in files if f.lower().endswith((".png",".jpg",".jpeg"))]
+                imgs_png.sort(key=lambda f: os.path.getmtime(os.path.join(root,f)), reverse=True)
+                for f in imgs_png[:50]:
+                    fp=os.path.join(root,f)
+                    imgs.append({"name":f,"prompt":"","url":f"/api/image/{os.path.relpath(fp,BASE_DIR).replace(os.sep,'/')}"})
             for root,dirs,files in os.walk(os.path.join(BASE_DIR,"output_jugou_differ")):
-                for f in sorted(files,reverse=True)[:50]:
-                    if f.lower().endswith((".png",".jpg",".jpeg")):
-                        fp=os.path.join(root,f)
+                imgs_png=[f for f in files if f.lower().endswith((".png",".jpg",".jpeg"))]
+                imgs_png.sort(key=lambda f: os.path.getmtime(os.path.join(root,f)), reverse=True)
+                for f in imgs_png[:50]:
                         imgs.append({"name":f,"prompt":"","url":f"/api/image/{os.path.relpath(fp,BASE_DIR).replace(os.sep,'/')}"})
         return {"ok":True,"images":imgs[:100]}
 
