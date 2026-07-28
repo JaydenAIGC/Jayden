@@ -851,7 +851,7 @@ async function genIdeas(){
  grid.innerHTML="";CARDS=[];
  r.descriptions.forEach((d,i)=>{
   const fp=r.prompts?.[i]||d;
-  CARDS.push({desc:d,img:null,prompt:fp,batchId:r.batch_id||"",descIdx:i});
+  CARDS.push({desc:d,img:null,prompt:fp,batchId:r.batch_id||"",descIdx:i,optimized:false});
   const c=document.createElement("div");c.className="card";
   c.innerHTML=`<div class="idx">#${i+1}
    <span style="float:right;font-size:10px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">▼</span></div>
@@ -863,6 +863,7 @@ async function genIdeas(){
    </div>
    <div class="prev" id="prev${i}"><span class="ph">等待生图...</span></div>
    <div class="card-tags" id="tags${i}">
+    <span id="optTag${i}" style="display:none;color:var(--accent2);font-size:9px">✦ 已优化</span>
     <span>📐${document.getElementById('sizeSelect')?.value||'9:16'}</span>
    </div>
   `;
@@ -890,20 +891,23 @@ async function redoDesc(i){
  const r=await api("/api/gen_one");
  if(btns&&btns[1]){btns[1].disabled=false;btns[1].innerHTML="重新描述"}
  if(!r.ok)return;
- CARDS[i].desc=r.desc;CARDS[i].prompt=r.prompt||r.desc;
+ CARDS[i].desc=r.desc;CARDS[i].prompt=r.prompt||r.desc;CARDS[i].optimized=false;
  document.getElementById("desc"+i).textContent=document.getElementById("toggle"+i)?.textContent=="▲"?r.prompt||r.desc:r.desc;
  document.getElementById("prev"+i).innerHTML='<span class="ph">等待生图...</span>';
- document.getElementById("save"+i).classList.add("hidden");st("已更新","var(--accent2)");
+ document.getElementById("save"+i).classList.add("hidden");
+ const ot=document.getElementById("optTag"+i);if(ot)ot.style.display="none";
+ st("已更新","var(--accent2)");
 }
 async function redoAll(){
  const btn=document.querySelector("#batchBar .btng-d");if(btn){btn.disabled=true;btn.innerHTML='<span class="loading"></span>'}
  for(let i=0;i<CARDS.length;i++){
   const r=await api("/api/gen_one");
   if(r.ok){
-   CARDS[i].desc=r.desc;CARDS[i].prompt=r.prompt||r.desc;
+   CARDS[i].desc=r.desc;CARDS[i].prompt=r.prompt||r.desc;CARDS[i].optimized=false;
    document.getElementById("desc"+i).textContent=r.desc;
    document.getElementById("prev"+i).innerHTML='<span class="ph">等待生图...</span>';
    document.getElementById("save"+i).classList.add("hidden");
+   const ot=document.getElementById("optTag"+i);if(ot)ot.style.display="none";
   }
  }
  if(btn){btn.disabled=false;btn.innerHTML="全部重写"}
@@ -920,8 +924,10 @@ async function optimizeAll(){
  for(let i=0;i<r.optimized.length&&i<CARDS.length;i++){
   const full=r.optimized[i];
   const short=full.length>80?full.slice(0,77)+'...':full;
-  CARDS[i].desc=short;CARDS[i].prompt=full;
+  CARDS[i].desc=short;CARDS[i].prompt=full;CARDS[i].optimized=true;
   document.getElementById("desc"+i).textContent=short;
+  const ot=document.getElementById("optTag"+i);
+  if(ot)ot.style.display="inline";
  }
  st("优化完成 "+r.optimized.length+" 条","var(--accent2)");
 }
