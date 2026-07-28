@@ -772,6 +772,8 @@ body{font-size:13px;overflow:auto}
 let CARDS=[],CONFIG={},COMP=false,LIGHT=false,HUMAN=true;
 async function api(path,data){
  const r=await fetch(path,{method:data?"POST":"GET",headers:{"Content-Type":"application/json"},credentials:"include",body:data?JSON.stringify(data):null});
+ const ct=r.headers.get("content-type")||"";
+ if(!ct.includes("json")){const txt=await r.text();throw new Error(txt.slice(0,80))}
  const j=await r.json();return j}
 async function init(){
  const r=await api("/api/init");CONFIG=r.config||{};
