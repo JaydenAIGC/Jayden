@@ -549,7 +549,7 @@ body::after{content:'';position:fixed;bottom:-25%;right:-10%;width:60%;height:60
 :root{--bg:#0f0f13;--card:#18181c;--surf:#22222a;--input:#2a2a32;--border:#33333d;--accent:#6c5ce7;--accent2:#00cec9;--warn:#e17055;--text:#e8e8ed;--body:#b0b0b8;--hint:#6a6a74}
 .header{display:flex;align-items:center;padding:10px 20px;gap:12px;background:linear-gradient(135deg,#141420 0%,#1a1a30 50%,#141420 100%);border-bottom:1px solid rgba(51,51,61,.5);flex-shrink:0;position:relative;z-index:1}
 .header::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(108,92,231,.04) 50%,transparent 100%);pointer-events:none}
-.header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0}
+.header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;display:flex;align-items:baseline;gap:4px}
 .header select{background:var(--surf);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:13px;outline:none;cursor:pointer}
 .header .tab{background:none;border:none;color:var(--hint);font-size:13px;cursor:pointer;padding:5px 12px;border-radius:4px;font-weight:600}
 .header .tab:hover{color:var(--text);background:var(--surf)}
@@ -693,11 +693,11 @@ body{font-size:13px;overflow:auto}
 </head>
 <body>
 <div class="header">
- <h1>街灯AI JAYDEN AI</h1>
+ <h1>街灯AI <span style="font-size:13px;font-weight:600">JAYDEN AI</span></h1>
  <div style="flex:1"></div>
  <button class="tab act" onclick="showTab('gen')" id="tabGen">生成</button>
  <button class="tab" onclick="showTab('lib')" id="tabLib">图库 <span id="galleryCount" style="font-size:9px;color:var(--accent2)"></span></button>
- <button class="btng btng-d" onclick="showSettings()" style="font-size:16px;padding:2px 10px;line-height:1.4">⚙</button>
+ <button class="btng btng-d" onclick="showSettings()" style="font-size:11px;padding:3px 10px">端口</button>
 </div>
 
 <div class="tbar" id="tbar"><span>就绪</span></div>
