@@ -92,9 +92,10 @@ class Backend:
         if subject:
             ins=f"""【第二步：结构化初稿】基于核心主体「{subject}」生成{count}条完整初稿，每行一条。
 
-语序强制固定（不可改变顺序）：镜头语言 → 美术画风 → 核心主体与配套环境 → 人物设定 → 光影色彩 → 材质画质
+语序强制固定：镜头语言 → 美术画风 → 核心主体与配套环境 → 人物设定 → 光影色彩 → 材质画质
 
 规则：
+- ⚠️ {count}条必须使用**完全一致的美术画风**（同一套渲染/画风关键词）
 - 完整保留以下主体，搭配适配基础环境：{subject}
 - 自主选择机位，优先24-28mm广角，全景采用深景深
 - 平衡规整构图，画面充足留白
@@ -107,6 +108,7 @@ class Backend:
 语序强制固定：镜头语言 → 美术画风 → 核心主体与配套环境 → 人物设定 → 光影色彩 → 材质画质
 
 规则：
+- ⚠️ {count}条必须使用**完全一致的美术画风**
 - 自主创作宏大核心主体，单一核心不堆砌
 - 自主选择机位，优先24-28mm广角，全景深景深
 - 平衡规整构图，充足留白
@@ -116,7 +118,7 @@ class Backend:
         try:
             h=self._headers("llm")
             p={"model":self.config.get("text_model","deepseek-v4-flash"),
-               "messages":[{"role":"user","content":ins}],"max_tokens":8192,"temperature":0.8}
+               "messages":[{"role":"user","content":ins}],"max_tokens":8192,"temperature":0.6}
             r=requests.post(f"{self.config.get('llm_base_url','https://api.deepseek.com')}/chat/completions",headers=h,json=p,timeout=60)
             r.raise_for_status()
             txt=r.json()["choices"][0]["message"]["content"]
