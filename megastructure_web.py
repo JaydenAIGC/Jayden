@@ -533,7 +533,7 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
 HTML=r"""<!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>街灯AI JAYDEN AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -696,7 +696,7 @@ body{font-size:13px;overflow:auto}
 <div class="header">
  <div style="display:flex;flex-direction:column;line-height:1.2;flex-shrink:0">
   <h1 style="margin:0;font-size:18px;font-weight:700;background:linear-gradient(135deg,#a29bfe,#6c5ce7 30%,#00cec9 70%,#55efc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">街灯AI</h1>
-  <span style="font-size:9px;color:var(--hint);font-weight:400;letter-spacing:1px">desgin by jayden</span>
+  <span style="font-size:9px;color:var(--hint);font-weight:400;letter-spacing:1px">Created by Jayden</span>
  </div>
  <div style="flex:1"></div>
  <button class="tab act" onclick="showTab('gen')" id="tabGen">生成</button>
