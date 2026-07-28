@@ -45,6 +45,35 @@ class Backend:
             v=os.environ.get(envk)
             if v: c[ck]=v
         return c
+    def _batch_dir(self):
+        bd=os.path.join(BASE_DIR,"history","batches")
+        os.makedirs(bd,exist_ok=True)
+        return bd
+    def _load_batches(self):
+        bd=self._batch_dir();bs=[]
+        for fn in sorted(os.listdir(bd),reverse=True):
+            if fn.endswith(".json"):
+                try:
+                    with open(os.path.join(bd,fn),"r",encoding="utf-8") as f: bs.append(json.load(f))
+                except: pass
+        return bs
+    def _new_batch(self,subject,style,descs):
+        bid=datetime.now().strftime("%Y%m%d_%H%M%S")
+        b={"id":bid,"subject":subject,"style":style,"created":bid,"descriptions":descs,"images":[],"marketing":[]}
+        bd=self._batch_dir()
+        with open(os.path.join(bd,f"{bid}.json"),"w",encoding="utf-8") as f: json.dump(b,f,ensure_ascii=False,indent=2)
+        return bid
+    def _add_to_batch(self,bid,fname,prompt,desc_idx):
+        bs=self._load_batches()
+        for b in bs:
+            if b["id"]==bid:
+                b.setdefault("images",[]).append({"file":fname,"prompt":prompt,"desc_idx":desc_idx})
+                b.setdefault("marketing",[])
+                self._save_batch(b); return True
+        return False
+    def _save_batch(self,b):
+        bd=self._batch_dir()
+        with open(os.path.join(bd,f"{b['id']}.json"),"w",encoding="utf-8") as f: json.dump(b,f,ensure_ascii=False,indent=2)
     def _load_styles(self):
         st={}
         dp=STYLE_DIR
@@ -146,25 +175,28 @@ class Backend:
             ins=f"""围绕主题「{subject}」生成{count}条场景描述JSON，每行一个：
 {{"subject":"场景描述文本","target_style":"{style_name}"}}
 
-面向gpt-image-2绘图模型优化，规范：
-- 每条同一建筑，**光线、色调、氛围全部锁定一致**，只变化视角构图
-- 视角变化：远景全景（突出孤寂空旷）、中景压缩感、仰视压迫感（突出建筑巨大）、侧翼视角、俯瞰视角
-- ⚠️ 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境来制造压迫感
+面向gpt-image-2绘图模型优化，核心规则（必须遵守）：
+- ⚠️ **同主体原则**：{count}条必须是**同一个建筑/同一个主体**，不能替换为其他建筑
+- ⚠️ **共性原则**：建筑形态、结构细节（拱门/石柱/穹顶/台阶等）、材质（石料/锈蚀/风化等）、色调、光线时段必须**完全一致**
+- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼→俯瞰，但建筑本身不能变
+- ⚠️ 禁止生成完全不同场景——比如第一条写了石质拱门建筑，后面就不能变成金属塔楼或完全不同构造
+- 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境来制造压迫感
 - 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声、无垠
 - subject要求**100-150字**，强化：空间层次（前后远近）、材质质感（石材纹理/风化/锈蚀）、光线方向与色温
 - 结构必须包含：地貌环境 + 建筑主体形态 + 结构细节（支柱/拱券/塔楼/台阶/穹顶等）+ 材质质感 + 空间位置
 - 句式：环境地貌 + 巨型主体建筑 + 结构细节描述 + 空间位置形态
-- ⚠️ 色彩基调、光线时段必须全统一，不能轮换变化
 - 禁止人物、特写、小型物件（人物由后续优化步骤统一添加）
 - 禁止短句、禁止笼统概括"""
         else:
             ins=f"""当前风格「{style_name}」氛围：{mood}。生成{count}条场景描述JSON，每行一个：
 {{"subject":"场景描述文本","target_style":"{style_name}"}}
 
-面向gpt-image-2绘图模型优化，规范：
-- 每条同一建筑，**光线、色调、氛围全部锁定一致**，只变化视角构图
-- 视角变化：远景全景（突出孤寂空旷）、中景压缩感、仰视压迫感（突出巨大）、侧翼视角
-- ⚠️ 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境制造压迫感
+面向gpt-image-2绘图模型优化，核心规则（必须遵守）：
+- ⚠️ **同主体原则**：{count}条必须是**同一个建筑/同一个主体**，不能替换为其他建筑
+- ⚠️ **共性原则**：建筑形态、结构细节、材质、色调、光线时段必须**完全一致**
+- 只允许轻微视角变化：远景全景→中景压缩→仰视压迫→侧翼
+- ⚠️ 禁止生成完全不同场景——建筑身份不能变
+- 核心情绪：孤寂、震撼、空旷，通过巨大建筑对比渺小环境制造压迫感
 - 关键词取向：苍凉、荒芜、沉寂、肃穆、萧瑟、死寂、无声
 - subject要求**100-150字**，强化：空间层次、材质质感、光线方向与色温
 - 结构必须包含：地貌环境 + 建筑主体形态 + 结构细节（支柱/拱券/塔楼/台阶/穹顶等）+ 材质质感 + 空间位置
@@ -189,7 +221,9 @@ class Backend:
             lines=[l for l in lines if len(l)>20]
             # 对每条描述词构建完整Prompt
             prompts=[self.build_prompt(d,False,False,self.config.get("keep_human",True),"1024x1792") for d in lines[:count]]
-            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"hint":hint}
+            # 创建批次
+            batch_id=self._new_batch(subject or f"{style_name}场景",style_name,lines[:count])
+            return {"ok":True,"descriptions":lines[:count],"prompts":prompts,"hint":hint,"batch_id":batch_id}
         except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:120]}"}
     def gen_one_desc(self):
         try:
@@ -214,7 +248,63 @@ class Backend:
             if len(raw)<20: raw="云海断崖之上，矗立一座布满远古浮雕的巨型通天祭坛"
             prompt=self.build_prompt(raw,False,False,self.config.get("keep_human",True),"1024x1792")
             return {"ok":True,"desc":raw,"prompt":prompt}
-        except Exception as e: return {"ok":False,"error":str(e)[:100]}
+        except Exception as e: return {"ok":False,"error":f"LLM错误: {str(e)[:80]}"}
+    def gen_marketing(self,subject,desc):
+        # 保留兼容
+        return self.gen_batch_poem_by_subject(subject,desc)
+    def gen_batch_poem_by_subject(self,subject,desc):
+        try:
+            h=self._headers("llm")
+            p={"model":self.config.get("text_model","deepseek-v4-flash"),
+               "messages":[{"role":"user","content":f"""为以下AI场景写一句像故事开头的话（10-20字），有叙事感和画面意境：
+
+场景主体：{subject}
+场景描述：{desc[:150]}
+
+要求：
+- 像小说或电影开篇第一句，引人入胜
+- 可以有故事感、叙事张力
+- 不要"震撼""史诗""宏大"等直白词
+- **严格控制在10-20字**
+- 只输出一句话，不要引号或解释"""}],
+               "max_tokens":100,"temperature":0.8}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=30)
+            r.raise_for_status()
+            txt=r.json()["choices"][0]["message"]["content"].strip().strip("\"'")
+            return {"ok":True,"text":txt}
+        except Exception as e: return {"ok":False,"error":str(e)[:80]}
+    def gen_batch_poem(self,batch_id):
+        try:
+            bs=self._load_batches()
+            b=None
+            for bb in bs:
+                if bb["id"]==batch_id: b=bb; break
+            if not b: return {"ok":False,"error":"批次不存在"}
+            subj=b.get("subject","未知场景")
+            descs=b.get("descriptions",[])
+            combined="；".join(descs[:3])[:300]
+            h=self._headers("llm")
+            p={"model":self.config.get("text_model","deepseek-v4-flash"),
+               "messages":[{"role":"user","content":f"""为以下AI史诗场景写一句像故事开头的话（10-20字），有叙事感：
+
+场景：{subj}
+描述：{combined}
+
+要求：
+- 像小说或电影开篇第一句，引人入胜
+- 有故事感、叙事张力，像要展开一段传奇
+- 不要"震撼""史诗""宏大"等直白词
+- **严格控制在10-20字**
+- 只输出一句话，不要引号或解释"""}],
+               "max_tokens":100,"temperature":0.8}
+            r=requests.post(f"{self.config.get('llm_base_url','https://api.apimart.ai/v1')}/chat/completions",headers=h,json=p,timeout=30)
+            r.raise_for_status()
+            poem=r.json()["choices"][0]["message"]["content"].strip().strip("\"'")
+            # 保存到批次
+            b["poem"]=poem
+            self._save_batch(b)
+            return {"ok":True,"text":poem}
+        except Exception as e: return {"ok":False,"error":str(e)[:80]}
     def optimize_descs(self,descs,style=""):
         if not descs: return {"ok":False,"error":"无描述词"}
         try:
@@ -270,7 +360,7 @@ class Backend:
         sfx=self.config.get("custom_suffix","")
         if sfx: p+=f", {sfx}"
         return p
-    def generate(self,desc="",comp=False,light=False,size="1024x1792",prompt="",human=True):
+    def generate(self,desc="",comp=False,light=False,size="1024x1792",prompt="",human=True,batch_id="",desc_idx=0):
         if not prompt: prompt=self.build_prompt(desc,comp,light,human,size)
         try:
             h=self._headers("img")
@@ -308,6 +398,9 @@ class Backend:
                                 # 保存提示词
                                 with open(os.path.join(hdir,f"{ts}.txt"),"w",encoding="utf-8") as f:
                                     f.write(prompt)
+                                # 加入批次
+                                if batch_id:
+                                    self._add_to_batch(batch_id,f"{ts}.png",prompt,desc_idx)
                             except: pass
                             return {"ok":True,"b64":b64,"prompt":prompt}
                         return {"ok":False,"error":"无结果"}
@@ -367,6 +460,7 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
             else:self.send_error(404)
         elif self.path.startswith("/api/open_dir"):
             os.startfile(os.path.join(BASE_DIR,"output"));self._json({"ok":True})
+        elif self.path=="/api/list_batches": self._json({"ok":True,"batches":backend._load_batches()})
         else: self.send_error(404)
     def do_POST(self):
         if AUTH_TOKEN and not self._check_auth():
@@ -392,8 +486,10 @@ body{{font-family:system-ui;background:#0f0f13;color:#e8e8ed;display:flex;align-
             elif p=="/api/gen_ideas": resp=backend.gen_subject_ideas(data.get("style",""))
             elif p=="/api/gen_one": resp=backend.gen_one_desc()
             elif p=="/api/optimize": resp=backend.optimize_descs(data.get("descriptions",[]),data.get("style",""))
-            elif p=="/api/generate": resp=backend.generate(data.get("desc",""),data.get("comp",False),data.get("light",False),data.get("size","1024x1792"),data.get("prompt",""),data.get("human",True))
+            elif p=="/api/generate": resp=backend.generate(data.get("desc",""),data.get("comp",False),data.get("light",False),data.get("size","1024x1792"),data.get("prompt",""),data.get("human",True),data.get("batch_id",""),int(data.get("desc_idx",0)))
             elif p=="/api/save_config": resp=backend.save_config(data)
+            elif p=="/api/gen_marketing": resp=backend.gen_marketing(data.get("subject",""),data.get("desc",""))
+            elif p=="/api/gen_batch_poem": resp=backend.gen_batch_poem(data.get("batch_id",""))
             elif p=="/api/set_style":
                 backend.style_name=data.get("name","");backend.STYLE=backend.STYLES.get(backend.style_name,{});
                 backend.config["selected_style"]=backend.style_name;backend.save_config(backend.config);resp={"ok":True}
@@ -468,6 +564,20 @@ body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50
 .gallery .g-item img{width:160px;height:100px;object-fit:cover;flex-shrink:0;cursor:zoom-in}
 .gallery .g-item .g-info{flex:1;padding:8px 10px;overflow:hidden;display:flex;flex-direction:column;gap:4px}
 .gallery .g-item .gl{font-size:10px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gallery .g-item .gp{font-size:11px;color:var(--body);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* 批次图库 */
+.g-batch{margin:0 0 8px 0;background:var(--card);border-radius:8px;border:1px solid var(--border);overflow:hidden}
+.g-batch-hd{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;user-select:none}
+.g-batch-hd:hover{background:var(--surf)}
+.g-batch-subj{font-size:13px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-batch-meta{font-size:10px;color:var(--hint);white-space:nowrap}
+.g-batch-expand{font-size:10px;color:var(--hint);transition:transform .2s}
+.g-batch-body{display:none;flex-wrap:wrap;gap:6px;padding:6px 10px 10px;border-top:1px solid var(--border)}
+.g-batch-body.show{display:flex}
+.g-batch-img{width:calc(20% - 5px);min-width:120px;flex:1}
+.g-batch-img img{width:100%;height:120px;object-fit:cover;border-radius:4px;cursor:zoom-in}
+.g-batch-txt{font-size:9px;color:var(--hint);padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-batch-poem{width:100%;font-size:12px;color:var(--accent2);font-style:italic;padding:6px 0;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;line-height:1.6}
 .gallery .g-item .gp{font-size:11px;color:var(--body);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .gwrap{flex:1;overflow-y:auto;padding:12px 16px 100px;position:relative;z-index:1}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
@@ -697,7 +807,7 @@ async function genIdeas(){
  grid.innerHTML="";CARDS=[];
  r.descriptions.forEach((d,i)=>{
   const fp=r.prompts?.[i]||d;
-  CARDS.push({desc:d,img:null,prompt:fp});
+  CARDS.push({desc:d,img:null,prompt:fp,batchId:r.batch_id||"",descIdx:i});
   const c=document.createElement("div");c.className="card";
   c.innerHTML=`<div class="idx">#${i+1}
    <span style="float:right;font-size:9px;color:var(--accent2);cursor:pointer" onclick="togglePrompt(${i})" id="toggle${i}">📄完整</span></div>
@@ -785,7 +895,7 @@ async function genImg(i){
  pv.innerHTML='<span class="ph" style="color:var(--accent)"><span class="loading" style="width:14px;height:14px;border-width:2px"></span> 生图中...</span>';
  st(`生图中 ${i+1}/${CARDS.length}...`,"var(--accent)");
  try{
-  const raw=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({desc:CARDS[i].desc,prompt:CARDS[i].prompt||CARDS[i].desc,comp:COMP,light:LIGHT,size:sz,human:HUMAN})});
+  const raw=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({desc:CARDS[i].desc,prompt:CARDS[i].prompt||CARDS[i].desc,comp:COMP,light:LIGHT,size:sz,human:HUMAN,batch_id:CARDS[i].batchId||"",desc_idx:CARDS[i].descIdx||i})});
   const txt=await raw.text();console.log("genImg raw:",txt);
   let r;
   try{r=JSON.parse(txt)}catch(e){st("生图异常: 返回非JSON: "+txt.slice(0,80),"var(--warn)");if(btn){btn.disabled=false;btn.innerHTML="生图"}return}
@@ -813,6 +923,15 @@ function reuseGallery(name){
  document.getElementById("subjInp").value=name.replace(/\.\w+$/,"");
  showTab("gen");
  st("已复用: "+name,"var(--accent2)");
+}
+async function genBatchPoem(bid){
+ const btn=event.target;btn.disabled=true;btn.innerHTML='<span class="loading"></span>';
+ try{
+  const r=await api("/api/gen_batch_poem",{batch_id:bid});
+  if(!r.ok){st("失败: "+(r.error||""),"var(--warn)");btn.disabled=false;btn.innerHTML='✨ 故事开头';return}
+  st("故事已生成","var(--accent2)");
+  loadGallery();
+ }catch(e){st("出错: "+e.message,"var(--warn)");btn.disabled=false;btn.innerHTML='✨ 故事开头'}
 }
 function showNewStyle(){
  const c=CONFIG||{};
@@ -869,21 +988,45 @@ function showTab(t){
 async function loadGallery(){
  const g=document.getElementById("gallery");g.innerHTML="<span style='color:var(--hint)'>加载中...</span>";
  try{
-  const r=await api("/api/list_images");if(!r.ok||!r.images){g.innerHTML="<span style='color:var(--hint)'>暂无素材</span>";return}
+  // 同时加载批次和图片
+  const [br,ir]=await Promise.all([api("/api/list_batches"),api("/api/list_images")]);
+  const batches=br.batches||[];
+  const allImages=ir.images||[];
+  if(!batches.length&&!allImages.length){g.innerHTML="<span style='color:var(--hint)'>暂无素材</span>";return}
   g.innerHTML="";
-  r.images.forEach(img=>{
-   const d=document.createElement("div");d.className="g-item";
-   d.innerHTML=`<img src="${img.url}" onclick="event.stopPropagation();document.getElementById('zoomImg').src=this.src;document.getElementById('zoomLayer').classList.add('show')" />
-<div class="g-info">
-<div class="gl">${img.name}</div>
-<div class="gp">${img.prompt||'（无描述词）'}</div>
-<div><button class="btng btng-d" style="font-size:8px;padding:1px 6px;margin-top:2px" onclick="event.stopPropagation();reuseGallery('${img.name}')">复用</button></div>
-</div>`;
-   g.appendChild(d);
+  // 先显示批次
+  batches.forEach(b=>{
+   const bdiv=document.createElement("div");bdiv.className="g-batch";
+   const imgs=b.images||[];
+   const n=b.subject||"未命名批次";
+   const stl=b.style||"";
+   const ds=b.descriptions||[];
+   bdiv.innerHTML=`<div class="g-batch-hd" onclick="this.nextElementSibling.classList.toggle('show')">
+    <span class="g-batch-subj">${n}</span>
+    <span class="g-batch-meta">${stl} · ${imgs.length||0}/${ds.length}图</span>
+    <span class="g-batch-expand">▶</span>
+   </div>
+   <div class="g-batch-body${imgs.length>0?' show':''}">
+    ${b.poem?`<div class="g-batch-poem">${b.poem}</div>`:''}
+    <div style="width:100%;margin-bottom:4px">
+     <button class="btng btng-d" style="font-size:9px;padding:2px 8px" onclick="genBatchPoem('${b.id}')">${b.poem?'🔄 重写故事':'✨ 故事开头'}</button>
+    </div>
+    ${imgs.map((img,i)=>`<div class="g-batch-img">
+      <img src="/api/image/history/${img.file}" onclick="document.getElementById('zoomImg').src=this.src;document.getElementById('zoomLayer').classList.add('show')" />
+      <div class="g-batch-txt">${(img.prompt||'').slice(0,60)}</div>
+     </div>`).join('')}
+    ${imgs.length===0?'<span style="color:var(--hint);font-size:11px;padding:8px">等待生成...</span>':''}
+   </div>`;
+   g.appendChild(bdiv);
   });
- }catch(e){g.innerHTML="<span style='color:var(--hint)'>加载失败</span>"}
+  // 旧版无批次图片也显示
+  // 更新数量
+ }catch(e){g.innerHTML="<span style='color:var(--hint)'>加载失败: "+e.message+"</span>"}
  const gc=document.getElementById("galleryCount");
- if(gc&&r.images)gc.textContent=r.images.length>0?`(${r.images.length})`:"";
+ try{
+  const ir2=await api("/api/list_images");
+  if(gc&&ir2.images)gc.textContent=ir2.images.length>0?`(${ir2.images.length})`:"";
+ }catch(e){}
 }
 function showSettings(){
  const c=CONFIG||{};document.getElementById("setContent").innerHTML=`
